@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="BarCodes\**" />
+    <Compile Remove="ProductImages\**" />
+    <EmbeddedResource Remove="BarCodes\**" />
+    <EmbeddedResource Remove="ProductImages\**" />
+    <None Remove="BarCodes\**" />
+    <None Remove="ProductImages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\AccountsController.cs" />
+    <Compile Remove="Controllers\OwnersController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.100.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\ComplyExchangeCMS.Contracts.csproj" />
+    <ProjectReference Include="..\Persistence\ComplyExchangeCMS.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>
