@@ -21,6 +21,9 @@ namespace ComplyExchangeCMS.Persistence
             services.AddScoped<IFormTypesService, FormTypesService>();
             services.AddScoped<IDocumentationService, DocumentationService>();
             services.AddScoped<ILOBService, LOBService>();
+            services.AddScoped<ICapacitiesService, CapacitiesService>();
+            services.AddScoped<IFormInstructionsService, FormInstructionsService>();
+            services.AddScoped<IRuleService, RuleService>();
         }
     }
 }

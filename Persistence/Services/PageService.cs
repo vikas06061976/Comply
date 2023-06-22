@@ -100,7 +100,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 IQueryable<PageViewModel> pages = connection.Query<PageViewModel>
-                    ($@"SELECT * FROM Pages where IsActive=1 and IsDeleted=0").AsQueryable();
+                    ($@"SELECT * FROM Pages where ParentId is NULL and IsActive=1 and IsDeleted=0").AsQueryable();
                 // and (name={searchName})
 
                 // Apply search filter

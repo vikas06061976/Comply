@@ -16,10 +16,13 @@ namespace ComplyExchangeCMS.Persistence.Services
         public IFormTypesService FormTypes { get; }
         public IDocumentationService Documentation { get; }
         public ILOBService LOBService { get; }
+        public ICapacitiesService CapacitiesService { get; }
+        public IFormInstructionsService FormInstructionsService { get; }
         public UnitOfWork(IProductService productService, IPageService pageService, 
             IContentManagementService contentManagementService, IAgentService agentService, 
             ICountryService countryService, ILanguageService languageService, 
-            IFormTypesService formTypesService, IDocumentationService documentationService, ILOBService lOBService)
+            IFormTypesService formTypesService, IDocumentationService documentationService, 
+            ILOBService lOBService, ICapacitiesService capacitiesService, IFormInstructionsService formInstructionsService )
         {
             Products = productService;
             Pages = pageService;
@@ -30,6 +33,8 @@ namespace ComplyExchangeCMS.Persistence.Services
             FormTypes = formTypesService;
             Documentation = documentationService;
             LOBService = lOBService;
+            CapacitiesService = capacitiesService;
+            FormInstructionsService = formInstructionsService;
         }       
     }
 }

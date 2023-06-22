@@ -48,8 +48,8 @@ namespace Web
 
             #region Live
             //corsBuilder.WithOrigins("https://localhost:3000",
-            //"https://122.176.101.76:8088",
-            //"http://122.176.101.76:8088", "http://localhost:3000");
+            //"https://122.176.101.76:8089",
+            //"http://122.176.101.76:8089", "http://localhost:3000");
 
             #endregion
 

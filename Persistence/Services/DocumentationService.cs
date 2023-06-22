@@ -46,14 +46,14 @@ namespace ComplyExchangeCMS.Persistence.Services
                     connection.Open();
                 }
 
-                IQueryable<DocumentationView> pages = connection.Query<DocumentationView>
+                IQueryable<DocumentationView> documents = connection.Query<DocumentationView>
                     ($@"SELECT * FROM Documentations where IsActive=1").AsQueryable();
                 // and (name={searchName})
 
                 // Apply search filter
                 if (!string.IsNullOrEmpty(searchName))
                 {
-                    pages = pages.Where(f => f.Name.Contains(searchName));
+                    documents = documents.Where(f => f.Name.Contains(searchName));
                 }
                 // Sorting
                 if (!string.IsNullOrEmpty(request.SortColumn))
@@ -64,7 +64,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "name":
-                                    pages = pages.OrderBy(f => f.Name);
+                                    documents = documents.OrderBy(f => f.Name);
                                     break;
                                 default:
                                     break;
@@ -74,7 +74,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "name":
-                                    pages = pages.OrderByDescending(f => f.Name);
+                                    documents = documents.OrderByDescending(f => f.Name);
                                     break;                                
                                 default:
                                     break;
@@ -86,9 +86,9 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 // Paging
-                var totalRecords = pages.Count();
+                var totalRecords = documents.Count();
                 var totalPages = (int)Math.Ceiling((decimal)totalRecords / request.PageSize);
-                var records = pages.Skip((request.PageNumber - 1) * request.PageSize)
+                var records = documents.Skip((request.PageNumber - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .ToList();
 

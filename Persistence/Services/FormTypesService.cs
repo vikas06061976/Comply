@@ -99,13 +99,13 @@ namespace ComplyExchangeCMS.Persistence.Services
                     connection.Open();
                 }
 
-                IQueryable<FormTypesView> pages = connection.Query<FormTypesView>
+                IQueryable<FormTypesView> forms = connection.Query<FormTypesView>
                     ($@"SELECT * FROM FormTypesSelfCertifications where IsActive=1 and IsDeleted=0").AsQueryable();
                 // and (name={searchName})
                 // Apply search filter
                 if (!string.IsNullOrEmpty(searchName))
                 {
-                    pages = pages.Where(f => f.Name.Contains(searchName));
+                    forms = forms.Where(f => f.Name.Contains(searchName));
                 }
 
                 // Sorting
@@ -117,10 +117,10 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "name":
-                                    pages = pages.OrderBy(f => f.Name);
+                                    forms = forms.OrderBy(f => f.Name);
                                     break;
                                 case "displayName":
-                                    pages = pages.OrderBy(f => f.DisplayName);
+                                    forms = forms.OrderBy(f => f.DisplayName);
                                     break;
                                 default:
                                     break;
@@ -130,10 +130,10 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "name":
-                                    pages = pages.OrderByDescending(f => f.Name);
+                                    forms = forms.OrderByDescending(f => f.Name);
                                     break;
                                 case "displayName":
-                                    pages = pages.OrderByDescending(f => f.DisplayName);
+                                    forms = forms.OrderByDescending(f => f.DisplayName);
                                     break;
                                 default:
                                     break;
@@ -145,9 +145,9 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 // Paging
-                var totalRecords = pages.Count();
+                var totalRecords = forms.Count();
                 var totalPages = (int)Math.Ceiling((decimal)totalRecords / request.PageSize);
-                var records = pages.Skip((request.PageNumber - 1) * request.PageSize)
+                var records = forms.Skip((request.PageNumber - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .ToList();
 

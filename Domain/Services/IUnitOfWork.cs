@@ -16,6 +16,8 @@ namespace Domain.Services
         IFormTypesService FormTypes { get; }
         IDocumentationService Documentation { get; }
         ILOBService LOBService { get; }
+        ICapacitiesService CapacitiesService { get; }
+        IFormInstructionsService FormInstructionsService { get; }
 
     }
 }

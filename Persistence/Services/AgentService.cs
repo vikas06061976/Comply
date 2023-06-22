@@ -1,17 +1,13 @@
-﻿using ComplyExchangeCMS.Domain.Entities;
+﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.Agent;
 using ComplyExchangeCMS.Domain.Services;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Dapper;
-using ComplyExchangeCMS.Domain.Models.Agent;
-using ComplyExchangeCMS.Domain.Models.Pages;
-using ComplyExchangeCMS.Domain;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -329,14 +325,14 @@ namespace ComplyExchangeCMS.Persistence.Services
                     connection.Open();
                 }
 
-                IQueryable<AgentView> pages = connection.Query<AgentView>
+                IQueryable<AgentView> agents = connection.Query<AgentView>
                     ($@"SELECT * FROM Agents").AsQueryable();
                 // and (name={searchName})
 
                 // Apply search filter
                 if (!string.IsNullOrEmpty(searchName))
                 {
-                    pages = pages.Where(f => f.Name.Contains(searchName));
+                    agents = agents.Where(f => f.Name.Contains(searchName));
                 }
                 // Sorting
                 if (!string.IsNullOrEmpty(request.SortColumn))
@@ -347,7 +343,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "name":
-                                    pages = pages.OrderBy(f => f.Name);
+                                    agents = agents.OrderBy(f => f.Name);
                                     break;
                                 default:
                                     break;
@@ -357,7 +353,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "name":
-                                    pages = pages.OrderByDescending(f => f.Name);
+                                    agents = agents.OrderByDescending(f => f.Name);
                                     break;
                                 default:
                                     break;
@@ -369,9 +365,9 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 // Paging
-                var totalRecords = pages.Count();
+                var totalRecords = agents.Count();
                 var totalPages = (int)Math.Ceiling((decimal)totalRecords / request.PageSize);
-                var records = pages.Skip((request.PageNumber - 1) * request.PageSize)
+                var records = agents.Skip((request.PageNumber - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .ToList();
 
