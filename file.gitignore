@@ -1,0 +1,27 @@
+# .NET Core build output folders
+/bin/
+/obj/
+
+# Node.js dependencies
+/node_modules/
+
+# NuGet packages
+/packages/
+
+# Visual Studio specific files and folders
+/.vs/
+/.idea/
+
+# Configuration files
+/appsettings.json
+/appsettings.*.json
+/secrets.json
+
+# Onion Architecture specific folders
+/Infrastructure/Persistence/Migrations/
+
+# Ignore specific project files
+**/*.user
+**/*.vspscc
+**/*.vssscc
+**/*.suo
