@@ -4,7 +4,7 @@ namespace ComplyExchangeCMS.Common
 {
     public class Enums
     {
-        public enum BalanceEntityTypes
+        public enum BalanceAgentCountriesImportant
         {
             Individual,
             Entity

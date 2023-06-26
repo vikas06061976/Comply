@@ -18,6 +18,7 @@ namespace Domain.Services
         ILOBService LOBService { get; }
         ICapacitiesService CapacitiesService { get; }
         IFormInstructionsService FormInstructionsService { get; }
+        IAgentEditListService AgentEditListService { get; }
 
     }
 }

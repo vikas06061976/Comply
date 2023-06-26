@@ -24,6 +24,7 @@ namespace ComplyExchangeCMS.Persistence
             services.AddScoped<ICapacitiesService, CapacitiesService>();
             services.AddScoped<IFormInstructionsService, FormInstructionsService>();
             services.AddScoped<IRuleService, RuleService>();
+            services.AddScoped<IAgentEditListService, AgentEditListService>();
         }
     }
 }
