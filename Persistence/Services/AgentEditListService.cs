@@ -128,6 +128,54 @@ namespace ComplyExchangeCMS.Persistence.Services
         }
         #endregion
 
+        #region Agent Capacity Hidden
+        public async Task<IEnumerable<AgentCapacityHiddenViewModel>> GetAgentCapacityHiddenByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as CapacityId, C.Name,AC.AgentId FROM Capacities C 
+                 left JOIN AgentCapacity_Hidden AC ON C.Id = AC.CapacityId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentCapacityHiddenViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+        public async Task UpsertAgentCapacityHiddenAsync(int agentId, List<int> existingAgentCapacityIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentCapacityHidden = await connection.QueryAsync<int>
+                    ("SELECT CapacityId FROM AgentCapacity_Hidden WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var CapacityToDelete = existingAgentCapacityHidden.Except(existingAgentCapacityIds);
+                var CapacityToAdd = existingAgentCapacityIds.Except(existingAgentCapacityHidden);
+
+                if (CapacityToDelete.Any())
+                {
+                    connection.Execute("delete from AgentCapacity_Hidden WHERE AgentId = @AgentId AND CapacityId IN @existingAgentCapacityIds",
+                        new { AgentId = agentId, existingAgentCapacityIds = CapacityToDelete });
+                }
+
+                var AgentCapacityHidden = CapacityToAdd.Select
+                    (CapacityId => new AgentCapacityHidden
+                    {
+                        AgentId = agentId,
+                        CapacityId = CapacityId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentCapacityHidden.Any())
+                {
+                    connection.Execute("INSERT INTO AgentCapacity_Hidden(AgentId, CapacityId, CreatedOn) " +
+                        "VALUES (@AgentId, @CapacityId, @CreatedOn)",
+                        AgentCapacityHidden);
+                }
+            }
+        }
+
+        #endregion
+
         #region Agent Chapter3EntityType Hidden
         public async Task<IEnumerable<AgentChapter3EntityTypeViewModel>> GetAgentChapter3EntityTypeHiddenByAgentIdAsync(int agentId)
         {
@@ -272,5 +320,226 @@ namespace ComplyExchangeCMS.Persistence.Services
 
         #endregion
 
+        #region Agent Document Mandatory
+        public async Task<IEnumerable<AgentDocumentationMandatoryViewModel>> GetAgentDocumentationMandatoryByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as DocumentationId, C.Name,AC.AgentId,
+AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C 
+                 left JOIN AgentDocumentation_Mandatory AC ON C.Id = AC.DocumentationId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentDocumentationMandatoryViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+        public async Task UpsertAgentDocumentationMandatoryAsync(int agentId, List<AgentDocumentationMandatoryInsertModel> existingAgentDocuments)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentDocumentationMandatory = await connection.QueryAsync<AgentDocumentationMandatory>("SELECT AgentId,DocumentationId, IsUSSubmission, IsSelfCertification FROM AgentDocumentation_Mandatory WHERE AgentId = @AgentId",
+                    new { AgentId = agentId });
+ 
+                var DocumentationIdsToDelete = existingAgentDocumentationMandatory
+          .Where(d => !existingAgentDocuments.Any(e => e.DocumentationId == d.DocumentationId)
+        //  || (!d.IsUSSubmission && !d.IsSelfCertification 
+        || existingAgentDocuments.Any(e => e.DocumentationId == d.DocumentationId && !e.IsUSSubmission && !e.IsSelfCertification))
+          .Select(d => d.DocumentationId);
+
+                var DocumentationIdsToAdd = existingAgentDocuments
+                    .Where(e => !existingAgentDocumentationMandatory.Any(d => d.DocumentationId == e.DocumentationId))
+                    .Select(e => e.DocumentationId);
+
+                if (DocumentationIdsToDelete.Any())
+                {
+                    connection.Execute("DELETE FROM AgentDocumentation_Mandatory WHERE AgentId = @AgentId AND DocumentationId IN @existingAgentDocumentsIds",
+                        new { AgentId = agentId, existingAgentDocumentsIds = DocumentationIdsToDelete });
+                }
+
+                foreach (var documentation in existingAgentDocuments)
+                {
+                    var existingDocumentation = existingAgentDocumentationMandatory.FirstOrDefault
+                        (d => d.DocumentationId == documentation.DocumentationId);
+
+                    if (existingDocumentation != null)
+                    {
+                        if (!existingDocumentation.IsUSSubmission || !existingDocumentation.IsSelfCertification)
+                        {
+                            existingDocumentation.IsUSSubmission = documentation.IsUSSubmission;
+                            existingDocumentation.IsSelfCertification = documentation.IsSelfCertification;
+
+                            connection.Execute("UPDATE AgentDocumentation_Mandatory SET IsUSSubmission = @IsUSSubmission, IsSelfCertification = @IsSelfCertification,ModifiedOn=@ModifiedOn WHERE AgentId = @AgentId AND DocumentationId = @DocumentationId",
+                                new
+                                {
+                                    AgentId = agentId,
+                                    DocumentationId = existingDocumentation.DocumentationId,
+                                    IsUSSubmission = existingDocumentation.IsUSSubmission,
+                                    IsSelfCertification = existingDocumentation.IsSelfCertification,
+                                    ModifiedOn=DateTime.Now
+                                });
+                        }
+                    }
+                    else
+                    {
+                        connection.Execute("INSERT INTO AgentDocumentation_Mandatory (AgentId, DocumentationId, IsUSSubmission, IsSelfCertification, CreatedOn) " +
+                            "VALUES (@AgentId, @DocumentationId, @IsUSSubmission, @IsSelfCertification, @CreatedOn)",
+                            new
+                            {
+                                AgentId = agentId,
+                                DocumentationId = documentation.DocumentationId,
+                                IsUSSubmission = documentation.IsUSSubmission,
+                                IsSelfCertification = documentation.IsSelfCertification,
+                                CreatedOn = DateTime.Now
+                            });
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Agent ExemptionCode Disabled
+        public async Task<IEnumerable<AgentExemptionCodeViewModel>> GetAgentExemptionCodeDisabledByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as ExemptionCodeId, C.Name,AC.AgentId FROM ExemptionCodes C 
+                 left JOIN AgentExemptionCode_Disabled AC ON C.Id = AC.ExemptionCodeId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentExemptionCodeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task UpsertAgentExemptionCodeDisabledAsync(int agentId, List<int> existingAgentExemptionCodeIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentExemptionCodeDisabled = await connection.QueryAsync<int>
+                    ("SELECT ExemptionCodeId FROM AgentExemptionCode_Disabled WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var ExemptionCodeToDelete = existingAgentExemptionCodeDisabled.Except(existingAgentExemptionCodeIds);
+                var ExemptionCodeToAdd = existingAgentExemptionCodeIds.Except(existingAgentExemptionCodeDisabled);
+
+                if (ExemptionCodeToDelete.Any())
+                {
+                    connection.Execute("delete from AgentExemptionCode_Disabled WHERE AgentId = @AgentId AND ExemptionCodeId IN @existingAgentExemptionCodeIds",
+                        new { AgentId = agentId, existingAgentExemptionCodeIds = ExemptionCodeToDelete });
+                }
+
+                var AgentExemptionCodeDisabled = ExemptionCodeToAdd.Select
+                    (ExemptionCodeId => new AgentExemptionCodeDisabled
+                    {
+                        AgentId = agentId,
+                        ExemptionCodeId = ExemptionCodeId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentExemptionCodeDisabled.Any())
+                {
+                    connection.Execute("INSERT INTO AgentExemptionCode_Disabled(AgentId, ExemptionCodeId, CreatedOn) " +
+                        "VALUES (@AgentId, @ExemptionCodeId, @CreatedOn)",
+                        AgentExemptionCodeDisabled);
+                }
+            }
+        }
+        #endregion
+
+        #region  Agent IncomeCode Hidden
+        public async Task<IEnumerable<AgentIncomeCodeViewModel>> GetAgentIncomeCodeHiddenByAgentIdAsync(int agentId)
+        {
+            var sql = @"SELECT C.Id as IncomeCodeId, C.Name,AC.AgentId FROM IncomeCodes C 
+                 left JOIN AgentIncomeCode_Hidden AC ON C.Id = AC.IncomeCodeId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentIncomeCodeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task UpsertAgentIncomeCodeHiddenAsync(int agentId, List<int> existingAgentIncomeCodeIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentIncomeCodeHidden = await connection.QueryAsync<int>
+                    ("SELECT IncomeCodeId FROM AgentIncomeCode_Hidden WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var IncomeCodeToDelete = existingAgentIncomeCodeHidden.Except(existingAgentIncomeCodeIds);
+                var IncomeCodeToAdd = existingAgentIncomeCodeIds.Except(existingAgentIncomeCodeHidden);
+
+                if (IncomeCodeToDelete.Any())
+                {
+                    connection.Execute("delete from AgentIncomeCode_Hidden WHERE AgentId = @AgentId AND IncomeCodeId IN @existingAgentIncomeCodeIds",
+                        new { AgentId = agentId, existingAgentIncomeCodeIds = IncomeCodeToDelete });
+                }
+
+                var AgentIncomeCodeHidden = IncomeCodeToAdd.Select
+                    (IncomeCodeId => new AgentIncomeCodeHidden
+                    {
+                        AgentId = agentId,
+                        IncomeCodeId = IncomeCodeId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentIncomeCodeHidden.Any())
+                {
+                    connection.Execute("INSERT INTO AgentIncomeCode_Hidden(AgentId, IncomeCodeId, CreatedOn) " +
+                        "VALUES (@AgentId, @IncomeCodeId, @CreatedOn)",
+                        AgentIncomeCodeHidden);
+                }
+            }
+        }
+
+        #endregion
+
+        #region  Agent USVisaType Hidden
+        public async Task<IEnumerable<AgentUSVisaTypeViewModel>> GetAgentUSVisaTypeHiddenByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as USVisaTypeId, C.Name,AC.AgentId FROM USVisaTypes C 
+                 left JOIN AgentUSVisaType_Hidden AC ON C.Id = AC.USVisaTypeId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentUSVisaTypeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task UpsertAgentUSVisaTypeHiddenAsync(int agentId, List<int> existingAgentUSVisaTypeIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentUSVisaTypeHidden = await connection.QueryAsync<int>
+                    ("SELECT USVisaTypeId FROM AgentUSVisaType_Hidden WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var USVisaTypeToDelete = existingAgentUSVisaTypeHidden.Except(existingAgentUSVisaTypeIds);
+                var USVisaTypeToAdd = existingAgentUSVisaTypeIds.Except(existingAgentUSVisaTypeHidden);
+
+                if (USVisaTypeToDelete.Any())
+                {
+                    connection.Execute("delete from AgentUSVisaType_Hidden WHERE AgentId = @AgentId AND USVisaTypeId IN @existingAgentUSVisaTypeIds",
+                        new { AgentId = agentId, existingAgentUSVisaTypeIds = USVisaTypeToDelete });
+                }
+
+                var AgentUSVisaTypeHidden = USVisaTypeToAdd.Select
+                    (USVisaTypeId => new AgentUSVisaTypeHidden
+                    {
+                        AgentId = agentId,
+                        USVisaTypeId = USVisaTypeId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentUSVisaTypeHidden.Any())
+                {
+                    connection.Execute("INSERT INTO AgentUSVisaType_Hidden(AgentId, USVisaTypeId, CreatedOn) " +
+                        "VALUES (@AgentId, @USVisaTypeId, @CreatedOn)",
+                        AgentUSVisaTypeHidden);
+                }
+            }
+        }
+        #endregion
     }
 }

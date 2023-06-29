@@ -56,6 +56,22 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         }
         #endregion
 
+        #region Agent Capacity Hidden   
+        [HttpGet("GetAgentCapacityHidden")]
+        public async Task<IActionResult> GetAgentCapacityHiddenByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentCapacityHiddenByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentCapacityHidden")]
+        public async Task<IActionResult> UpsertAgentCapacityHidden(int agentId, List<int> existingAgentChapter4EntityTypeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentCapacityHiddenAsync(agentId, existingAgentChapter4EntityTypeIds);
+            return Ok("Agent Capacity Hidden List updated successfully.");
+        }
+        #endregion
+
         #region Agent Chapter3EntityType Hidden   
         [HttpGet("GetAgentChapter3EntityTypeHidden")]
         public async Task<IActionResult> GetAgentChapter3EntityTypeHiddenByAgentId(int id)
@@ -105,11 +121,68 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         }
         #endregion
 
-        //[HttpDelete("Delete")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var data = await unitOfWork.AgentEditListService.DeleteAsync(id);
-        //    return Ok(data);
-        //}
+        #region Agent Documentation Mandatory   
+        [HttpGet("GetAgentDocumentationMandatory")]
+        public async Task<IActionResult> GetAgentDocumentationMandatoryByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentDocumentationMandatoryByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentDocumentationMandatory")]
+        public async Task<IActionResult> UpsertAgentDocumentationMandatory(int agentId, List<AgentDocumentationMandatoryInsertModel> existingAgentDocumentationIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentDocumentationMandatoryAsync(agentId, existingAgentDocumentationIds);
+            return Ok("Agent Documentation Mandatory List updated successfully.");
+        }
+        #endregion
+
+        #region Agent ExemptionCode Disabled
+        [HttpGet("GetAgentExemptionCodeDisabled")]
+        public async Task<IActionResult> GetAgentExemptionCodeDisabledByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentExemptionCodeDisabledByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentExemptionCodeDisabled")]
+        public async Task<IActionResult> UpsertAgentExemptionCodeDisabled(int agentId, List<int> existingAgentExemptionCodeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentExemptionCodeDisabledAsync(agentId, existingAgentExemptionCodeIds);
+            return Ok("Agent ExemptionCode Disabled List updated successfully.");
+        }
+        #endregion
+
+        #region Agent IncomeCode Hidden   
+        [HttpGet("GetAgentIncomeCodeHidden")]
+        public async Task<IActionResult> GetAgentIncomeCodeHiddenByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentIncomeCodeHiddenByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentIncomeCodeHidden")]
+        public async Task<IActionResult> UpsertAgentIncomeCodeHidden(int agentId, List<int> existingAgentIncomeCodeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentIncomeCodeHiddenAsync(agentId, existingAgentIncomeCodeIds);
+            return Ok("Agent IncomeCode Hidden List updated successfully.");
+        }
+        #endregion
+
+        #region Agent USVisaType Hidden   
+        [HttpGet("GetAgentUSVisaTypeHidden")]
+        public async Task<IActionResult> GetAgentUSVisaTypeHiddenByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentUSVisaTypeHiddenByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentUSVisaTypeHidden")]
+        public async Task<IActionResult> UpsertAgentUSVisaTypeHidden(int agentId, List<int> existingAgentUSVisaTypeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentUSVisaTypeHiddenAsync(agentId, existingAgentUSVisaTypeIds);
+            return Ok("Agent USVisaType Hidden List updated successfully.");
+        }
+        #endregion
     }
 }
