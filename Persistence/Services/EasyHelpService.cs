@@ -1,23 +1,20 @@
-﻿using ComplyExchangeCMS.Domain.Models.Pages;
-using ComplyExchangeCMS.Domain;
+﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.EasyHelp;
+using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using ComplyExchangeCMS.Domain.Models.Rules;
-using ComplyExchangeCMS.Domain.Services;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
-    public class RuleService : IRuleService
+    public class EasyHelpService : IEasyHelpService
     {
         private readonly IConfiguration _configuration;
-        public RuleService(IConfiguration configuration)
+        public EasyHelpService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
@@ -25,48 +22,46 @@ namespace ComplyExchangeCMS.Persistence.Services
         {
             return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
-        public async Task<int> InsertRules(RulesInsert rulesModel)
+        public async Task<int> InsertEasyHelp(EasyHelpInsert easyHelpModel)
         {
-            rulesModel.CreatedOn = DateTime.UtcNow;
+            easyHelpModel.CreatedOn = DateTime.UtcNow;
             using (var connection = CreateConnection())
             {
                 connection.Open();
 
                 // Create the parameters for the stored procedure
                 var parameters = new DynamicParameters();
-                parameters.Add("@Code", rulesModel.Code, DbType.String);
-                parameters.Add("@Class", rulesModel.RuleClass, DbType.String);
-                parameters.Add("@Warning", rulesModel.Warning, DbType.String);
-                parameters.Add("@isNotAllowedSubmissionToContinue", rulesModel.isNotAllowedSubmissionToContinue, DbType.Boolean);
-                parameters.Add("@DisableRule", rulesModel.DisableRule, DbType.Boolean);
-                parameters.Add("@CreatedOn", rulesModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@Easykey", easyHelpModel.Easykey, DbType.String);
+                parameters.Add("@Tooltip", easyHelpModel.Tooltip, DbType.String);
+                parameters.Add("@Text", easyHelpModel.Text, DbType.String);
+                parameters.Add("@MoreText", easyHelpModel.MoreText, DbType.String);
+                parameters.Add("@CreatedOn", easyHelpModel.CreatedOn, DbType.DateTime);
 
-                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertRules", parameters, commandType: CommandType.StoredProcedure);
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertEasyHelp", parameters, commandType: CommandType.StoredProcedure);
                 return result;
             }
         }
 
-        public async Task<int> UpdateRules(RulesUpdate rulesModel)
+        public async Task<int> UpdateEasyHelp(EasyHelpUpdate easyHelpModel)
         {
-            rulesModel.ModifiedOn = DateTime.UtcNow;
+            easyHelpModel.ModifiedOn = DateTime.UtcNow;
             using (var connection = CreateConnection())
             {
                 var parameters = new DynamicParameters();
-                parameters.Add("@Id", rulesModel.Id, DbType.Int32);
-                parameters.Add("@Code", rulesModel.Code, DbType.String);
-                parameters.Add("@Class", rulesModel.RuleClass, DbType.String);
-                parameters.Add("@Warning", rulesModel.Warning, DbType.String);
-                parameters.Add("@isNotAllowedSubmissionToContinue", rulesModel.isNotAllowedSubmissionToContinue, DbType.Boolean);
-                parameters.Add("@DisableRule", rulesModel.DisableRule, DbType.Boolean);
-                parameters.Add("@IsActive", rulesModel.IsActive, DbType.Boolean);
-                parameters.Add("@ModifiedOn", rulesModel.ModifiedOn, DbType.DateTime);
+                parameters.Add("@Id", easyHelpModel.Id, DbType.Int32);
+                parameters.Add("@Easykey", easyHelpModel.Easykey, DbType.String);
+                parameters.Add("@Tooltip", easyHelpModel.Tooltip, DbType.String);
+                parameters.Add("@Text", easyHelpModel.Text, DbType.String);
+                parameters.Add("@MoreText", easyHelpModel.MoreText, DbType.String);
+                parameters.Add("@IsActive", easyHelpModel.IsActive, DbType.Boolean);
+                parameters.Add("@ModifiedOn", easyHelpModel.ModifiedOn, DbType.DateTime);
 
-                var result = await connection.ExecuteAsync("UpdateRules", parameters, commandType: CommandType.StoredProcedure);
+                var result = await connection.ExecuteAsync("UpdateEasyHelp", parameters, commandType: CommandType.StoredProcedure);
                 return result;
             }
         }
 
-        public async Task<PaginationResponse<RulesView>> GetAllAsync
+        public async Task<PaginationResponse<EasyHelpView>> GetAllAsync
             (PaginationRequest request, string searchName)
         {
             using (var connection = CreateConnection())
@@ -76,14 +71,14 @@ namespace ComplyExchangeCMS.Persistence.Services
                     connection.Open();
                 }
 
-                IQueryable<RulesView> rules = connection.Query<RulesView>
-                    ($@"SELECT * FROM Rules where IsActive=1").AsQueryable();
+                IQueryable<EasyHelpView> easyHelps = connection.Query<EasyHelpView>
+                    ($@"SELECT * FROM EasyHelp where IsActive=1").AsQueryable();
                 // and (name={searchName})
 
                 // Apply search filter
                 if (!string.IsNullOrEmpty(searchName))
                 {
-                    rules = rules.Where(f => f.Code.Contains(searchName));
+                    easyHelps = easyHelps.Where(f => f.Easykey.Contains(searchName));
                 }
 
                 // Sorting
@@ -95,7 +90,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "code":
-                                    rules = rules.OrderBy(f => f.Code);
+                                    easyHelps = easyHelps.OrderBy(f => f.Easykey);
                                     break;
 
                                 default:
@@ -106,7 +101,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                             switch (request.SortColumn.ToLower())
                             {
                                 case "code":
-                                    rules = rules.OrderBy(f => f.Code);
+                                    easyHelps = easyHelps.OrderBy(f => f.Easykey);
                                     break;
                                 default:
                                     break;
@@ -118,14 +113,14 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 // Paging
-                var totalRecords = rules.Count();
+                var totalRecords = easyHelps.Count();
                 var totalPages = (int)Math.Ceiling((decimal)totalRecords / request.PageSize);
-                var records = rules.Skip((request.PageNumber - 1) * request.PageSize)
+                var records = easyHelps.Skip((request.PageNumber - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .ToList();
 
                 // Return pagination response object
-                return new PaginationResponse<RulesView>
+                return new PaginationResponse<EasyHelpView>
                 {
                     TotalRecords = totalRecords,
                     TotalPages = totalPages,
@@ -133,19 +128,19 @@ namespace ComplyExchangeCMS.Persistence.Services
                 };
             }
         }
-        public async Task<RulesView> GetByIdAsync(int id)
+        public async Task<EasyHelpView> GetByIdAsync(int id)
         {
-            var sql = "SELECT * FROM Rules WHERE Id = @Id and IsActive=1";
+            var sql = "SELECT * FROM EasyHelp WHERE Id = @Id and IsActive=1";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QuerySingleOrDefaultAsync<RulesView>(sql, new { Id = id });
+                var result = await connection.QuerySingleOrDefaultAsync<EasyHelpView>(sql, new { Id = id });
                 return result;
             }
         }
 
-        public async Task<int> DeleteRules(int id)
+        public async Task<int> DeleteEasyHelp(int id)
         {
-            var sql = "DELETE FROM Rules WHERE Id = @Id";
+            var sql = "DELETE FROM EasyHelp WHERE Id = @Id";
             using (var connection = CreateConnection())
             {
                 var result = await connection.ExecuteAsync(sql, new { Id = id });

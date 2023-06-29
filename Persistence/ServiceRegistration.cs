@@ -23,8 +23,10 @@ namespace ComplyExchangeCMS.Persistence
             services.AddScoped<ILOBService, LOBService>();
             services.AddScoped<ICapacitiesService, CapacitiesService>();
             services.AddScoped<IFormInstructionsService, FormInstructionsService>();
-            services.AddScoped<IRuleService, RuleService>();
             services.AddScoped<IAgentEditListService, AgentEditListService>();
+            services.AddScoped<IRuleService, RuleService>();
+            services.AddScoped<IEasyHelpService, EasyHelpService>();
+
         }
     }
 }
