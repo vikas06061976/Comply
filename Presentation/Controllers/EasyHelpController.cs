@@ -63,5 +63,19 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             var data = await unitOfWork.EasyHelpService.DeleteEasyHelp(id);
             return Ok(data);
         }
+        [HttpPost("InsertEasyHelpTranslation")]
+        public async Task<IActionResult> InsertEasyHelpTranslation(EasyHelpTranslation easyHelpModel)
+        {
+            await unitOfWork.EasyHelpService.InsertEasyHelpTranslation(easyHelpModel);
+            return Ok("EasyHelp translation updated successfully.");
+        }
+
+        [HttpGet("GetEasyHelpTranslation")]
+        public async Task<IActionResult> GetEasyHelpTranslation(int easyHelpId, int languageId)
+        {
+            var data = await unitOfWork.EasyHelpService.GetEasyHelpTranslation(easyHelpId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
     }
 }

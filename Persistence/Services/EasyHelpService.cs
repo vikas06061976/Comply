@@ -147,5 +147,38 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
+        public async Task<int> InsertEasyHelpTranslation(EasyHelpTranslation easyHelpModel)
+        {
+            easyHelpModel.CreatedOn = DateTime.UtcNow;
+            easyHelpModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@ToolTip", easyHelpModel.ToolTip, DbType.String);
+                parameters.Add("@EasyHelpId", easyHelpModel.EasyHelpId, DbType.Int32);
+                parameters.Add("@LanguageId", easyHelpModel.LanguageId, DbType.Int32);
+                parameters.Add("@Text", easyHelpModel.Text, DbType.String);
+                parameters.Add("@MoreText", easyHelpModel.MoreText, DbType.String);
+                parameters.Add("@BulkTranslation", easyHelpModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", easyHelpModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", easyHelpModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertEasyHelpTranslation", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<EasyHelpTranslationView> GetEasyHelpTranslation(int easyHelpId, int languageId)
+        {
+            var sql = "select * from EasyHelpTranslations where EasyHelpId= @EasyHelpId and LanguageId = @LanguageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<EasyHelpTranslationView>(sql, new { EasyHelpId = easyHelpId, languageId = languageId });
+                return result;
+            }
+        }
+
     }
 }

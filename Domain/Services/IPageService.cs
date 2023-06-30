@@ -20,6 +20,8 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<IReadOnlyList<PageDropDownViewModel>> GetByParentIdAsync();
         Task<int> InsertSubPage(PageInsertModel pagesModel);
         Task<int> GetCountBySubPageIdAsync(int Id);
-        Task<PaginationResponse<PageViewModel>> GetAllAsync(PaginationRequest request, string searchName);
+        Task<PaginationResponse<PageViewModel>> GetAllAsync(PaginationRequest request, string searchName); 
+        Task<int> InsertPageTranslation(PageTranslationInsert pagesModel);
+        Task<PageTranslationView> GetPageTranslation(int pageId, int languageId);
     }
 }

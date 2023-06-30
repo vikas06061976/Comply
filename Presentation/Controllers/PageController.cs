@@ -107,5 +107,19 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             if (data == 0) return Ok();
             return Ok(data);
         }
+        [HttpPost("InsertTranslation")]
+        public async Task<IActionResult> InsertTranslation(PageTranslationInsert pagesModel)
+        {
+            await unitOfWork.Pages.InsertPageTranslation(pagesModel);
+            return Ok("Page Translation updated successfully.");
+        }
+
+        [HttpGet("GetPageTranslation")]
+        public async Task<IActionResult> GetPageTranslation(int pageId, int languageId)
+        {
+            var data = await unitOfWork.Pages.GetPageTranslation(pageId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
     }
 }

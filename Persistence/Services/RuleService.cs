@@ -152,5 +152,36 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
+        public async Task<int> InsertRulesTranslation(RuleTranslationInsert ruleModel)
+        {
+            ruleModel.CreatedOn = DateTime.UtcNow;
+            ruleModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@Warning", ruleModel.Warning, DbType.String);
+                parameters.Add("@RulesId", ruleModel.RulesId, DbType.Int32);
+                parameters.Add("@LanguageId", ruleModel.LanguageId, DbType.Int32);
+                parameters.Add("@BulkTranslation", ruleModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", ruleModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", ruleModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertRulesTranslation", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<RuleTranslationView> GetRuleTranslation(int ruleId, int languageId)
+        {
+            var sql = "select * from RulesTranslations where RulesId= @ruleId and LanguageId = @LanguageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<RuleTranslationView>(sql, new { ruleId = ruleId, languageId = languageId });
+                return result;
+            }
+        }
+
     }
 }

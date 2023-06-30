@@ -10,7 +10,9 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<int> InsertEasyHelp(EasyHelpInsert easyHelpModel);
         Task<int> UpdateEasyHelp(EasyHelpUpdate easyHelpModel);
         Task<EasyHelpView> GetByIdAsync(int id);
-        Task<int> DeleteEasyHelp(int id);
+        Task<int> DeleteEasyHelp(int id); 
+        Task<int> InsertEasyHelpTranslation(EasyHelpTranslation easyHelpModel);
+        Task<EasyHelpTranslationView> GetEasyHelpTranslation(int easyHelpId, int languageId);
     }
 }
 

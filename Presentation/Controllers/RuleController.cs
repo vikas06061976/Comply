@@ -66,5 +66,19 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             var data = await unitOfWork.RuleService.DeleteRules(id);
             return Ok(data);
         }
+        [HttpPost("InsertRuleTranslation")]
+        public async Task<IActionResult> InsertRuleTranslation(RuleTranslationInsert ruleModel)
+        {
+            await unitOfWork.RuleService.InsertRulesTranslation(ruleModel);
+            return Ok("Rule translation updated successfully.");
+        }
+
+        [HttpGet("GetRuleTranslation")]
+        public async Task<IActionResult> GetRuleTranslation(int ruleId, int languageId)
+        {
+            var data = await unitOfWork.RuleService.GetRuleTranslation(ruleId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
     }
 }

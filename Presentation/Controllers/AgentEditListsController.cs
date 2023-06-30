@@ -184,5 +184,70 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok("Agent USVisaType Hidden List updated successfully.");
         }
         #endregion
+
+        #region Agent FATCAExemptionCode Hidden
+        [HttpGet("GetAgentFATCAExemptionCodeHidden")]
+        public async Task<IActionResult> GetAgentFATCAExemptionCodeHiddenByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentFATCAExemptionCodeHiddenByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentFATCAExemptionCodeHidden")]
+        public async Task<IActionResult> UpsertAgentFATCAExemptionCodeHidden(int agentId, List<int> existingAgentFATCAExemptionCodeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentFATCAExemptionCodeHiddenAsync(agentId, existingAgentFATCAExemptionCodeIds);
+            return Ok("Agent FATCAExemptionCode Hidden List updated successfully.");
+        }
+        #endregion
+
+        #region Agent PaymentType  
+        [HttpGet("GetAgentPaymentType")]
+        public async Task<IActionResult> GetAgentPaymentTypeByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentPaymentTypeByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentPaymentType")]
+        public async Task<IActionResult> UpsertAgentPaymentType(int agentId, List<AgentPaymentTypeInsertModel> existingAgentPaymentTypeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentPaymentTypeAsync(agentId, existingAgentPaymentTypeIds);
+            return Ok("Agent PaymentType List updated successfully.");
+        }
+        #endregion
+
+        #region Agent FATCAEntityGIINChallenge Disabled
+        [HttpGet("GetAgentFATCAEntityGIINChallengeDisabled")]
+        public async Task<IActionResult> GetAgentFATCAEntityGIINChallengeDisabledByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentFATCAEntityGIINChallengeDisabledByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentFATCAEntityGIINChallengeDisabled")]
+        public async Task<IActionResult> UpsertAgentFATCAEntityGIINChallengeDisabled(int agentId, List<int> existingAgentFATCAEntityGIINChallengeIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentFATCAEntityGIINChallengeDisabledAsync(agentId, existingAgentFATCAEntityGIINChallengeIds);
+            return Ok("Agent FATCAEntityGIINChallenge Disabled List updated successfully.");
+        }
+        #endregion
+
+
+        #region Agent AgentSPTQuestion Hidden  
+        [HttpGet("GetAgentSPTQuestionHidden")]
+        public async Task<IActionResult> GetAgentSPTQuestionHiddenByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentSPTQuestionHiddenByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentSPTQuestionHidden")]
+        public async Task<IActionResult> UpsertAgentSPTQuestionHidden(int agentId, List<AgentSPTQuestionInsertModel> existingAgentSPTQuestionIds)
+        {
+            await unitOfWork.AgentEditListService.UpsertAgentSPTQuestionHiddenAsync(agentId, existingAgentSPTQuestionIds);
+            return Ok("Agent SPTQuestion Hidden List updated successfully.");
+        }
+        #endregion
     }
 }

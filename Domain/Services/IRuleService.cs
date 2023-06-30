@@ -14,7 +14,9 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<int> InsertRules(RulesInsert rulesModel);
         Task<int> UpdateRules(RulesUpdate rulesModel);
         Task<RulesView> GetByIdAsync(int id);
-        Task<int> DeleteRules(int id);
+        Task<int> DeleteRules(int id); 
+        Task<int> InsertRulesTranslation(RuleTranslationInsert ruleModel);
+        Task<RuleTranslationView> GetRuleTranslation(int ruleId, int languageId);
     }
 }
 

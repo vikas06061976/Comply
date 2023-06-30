@@ -244,6 +244,38 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
+        public async Task<int> InsertPageTranslation(PageTranslationInsert pagesModel)
+        {
+            pagesModel.CreatedOn = DateTime.UtcNow;
+            pagesModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@Name", pagesModel.Name, DbType.String);
+                parameters.Add("@PageId", pagesModel.PageId, DbType.Int32);
+                parameters.Add("@LanguageId", pagesModel.LanguageId, DbType.Int32);
+                parameters.Add("@PageContent", pagesModel.PageContent, DbType.String);
+                parameters.Add("@Summary", pagesModel.Summary, DbType.String);
+                parameters.Add("@CreatedOn", pagesModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", pagesModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationPages", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<PageTranslationView> GetPageTranslation(int pageId, int languageId)
+        {
+            var sql = "select * from PageTranslations where PageId=@pageId and LanguageId=@languageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<PageTranslationView>(sql, new { pageId = pageId, languageId = languageId });
+                return result;
+            }
+        }
+
 
     }
 }

@@ -541,5 +541,256 @@ AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C
             }
         }
         #endregion
+
+        #region Agent FATCAExemptionCode Hidden
+        public async Task<IEnumerable<AgentFATCAExemptionCodeViewModel>> GetAgentFATCAExemptionCodeHiddenByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as FATCAExemptionCodeId, C.Name,AC.AgentId FROM FATCAExemptionCodes C 
+                 left JOIN AgentFATCAExemptionCode_Hidden AC ON C.Id = AC.FATCAExemptionCodeId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentFATCAExemptionCodeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task UpsertAgentFATCAExemptionCodeHiddenAsync(int agentId, List<int> existingAgentFATCAExemptionCodeIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentFATCAExemptionCodeHidden = await connection.QueryAsync<int>
+                    ("SELECT FATCAExemptionCodeId FROM AgentFATCAExemptionCode_Hidden WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var FATCAExemptionCodeToDelete = existingAgentFATCAExemptionCodeHidden.Except(existingAgentFATCAExemptionCodeIds);
+                var FATCAExemptionCodeToAdd = existingAgentFATCAExemptionCodeIds.Except(existingAgentFATCAExemptionCodeHidden);
+
+                if (FATCAExemptionCodeToDelete.Any())
+                {
+                    connection.Execute("delete from AgentFATCAExemptionCode_Hidden WHERE AgentId = @AgentId AND FATCAExemptionCodeId IN @existingAgentFATCAExemptionCodeIds",
+                        new { AgentId = agentId, existingAgentFATCAExemptionCodeIds = FATCAExemptionCodeToDelete });
+                }
+
+                var AgentFATCAExemptionCodeHidden = FATCAExemptionCodeToAdd.Select
+                    (FATCAExemptionCodeId => new AgentFATCAExemptionCodeHidden
+                    {
+                        AgentId = agentId,
+                        FATCAExemptionCodeId = FATCAExemptionCodeId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentFATCAExemptionCodeHidden.Any())
+                {
+                    connection.Execute("INSERT INTO AgentFATCAExemptionCode_Hidden(AgentId, FATCAExemptionCodeId, CreatedOn) " +
+                        "VALUES (@AgentId, @FATCAExemptionCodeId, @CreatedOn)",
+                        AgentFATCAExemptionCodeHidden);
+                }
+            }
+        }
+        #endregion
+
+        #region Agent PaymentType 
+        public async Task<IEnumerable<AgentPaymentTypeViewModel>> GetAgentPaymentTypeByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as PaymentTypeId, C.Name,AC.AgentId,
+AC.Hide,AC.MakeDefault FROM PaymentTypes C 
+                 left JOIN Agent_PaymentTypes AC ON C.Id = AC.PaymentTypeId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentPaymentTypeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+        public async Task UpsertAgentPaymentTypeAsync(int agentId, List<AgentPaymentTypeInsertModel> existingAgentPaymentTypes)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentPaymentType = await connection.QueryAsync<AgentPaymentType>("SELECT AgentId,PaymentTypeId, Hide, MakeDefault FROM Agent_PaymentTypes WHERE AgentId = @AgentId",
+                    new { AgentId = agentId });
+
+                var PaymentTypeIdsToDelete = existingAgentPaymentType
+          .Where(d => !existingAgentPaymentTypes.Any(e => e.PaymentTypeId == d.PaymentTypeId)
+        //  || (!d.Hide && !d.MakeDefault 
+        || existingAgentPaymentTypes.Any(e => e.PaymentTypeId == d.PaymentTypeId && !e.Hide && !e.MakeDefault))
+          .Select(d => d.PaymentTypeId);
+
+                var PaymentTypeIdsToAdd = existingAgentPaymentTypes
+                    .Where(e => !existingAgentPaymentType.Any(d => d.PaymentTypeId == e.PaymentTypeId))
+                    .Select(e => e.PaymentTypeId);
+
+                if (PaymentTypeIdsToDelete.Any())
+                {
+                    connection.Execute("DELETE FROM Agent_PaymentTypes WHERE AgentId = @AgentId AND PaymentTypeId IN @existingAgentPaymentTypesIds",
+                        new { AgentId = agentId, existingAgentPaymentTypesIds = PaymentTypeIdsToDelete });
+                }
+
+                foreach (var PaymentType in existingAgentPaymentTypes)
+                {
+                    var existingPaymentType = existingAgentPaymentType.FirstOrDefault
+                        (d => d.PaymentTypeId == PaymentType.PaymentTypeId);
+
+                    if (existingPaymentType != null)
+                    {
+                        //if (!existingPaymentType.Hide || !existingPaymentType.MakeDefault)
+                        //{
+                            existingPaymentType.Hide = PaymentType.Hide;
+                            existingPaymentType.MakeDefault = PaymentType.MakeDefault;
+
+                            connection.Execute("UPDATE Agent_PaymentTypes SET Hide = @Hide, MakeDefault = @MakeDefault,ModifiedOn=@ModifiedOn WHERE AgentId = @AgentId AND PaymentTypeId = @PaymentTypeId",
+                                new
+                                {
+                                    AgentId = agentId,
+                                    PaymentTypeId = existingPaymentType.PaymentTypeId,
+                                    Hide = existingPaymentType.Hide,
+                                    MakeDefault = existingPaymentType.MakeDefault,
+                                    ModifiedOn = DateTime.Now
+                                });
+                        //}
+                    }
+                    else
+                    {
+                        connection.Execute("INSERT INTO Agent_PaymentTypes (AgentId, PaymentTypeId, Hide, MakeDefault, CreatedOn) " +
+                            "VALUES (@AgentId, @PaymentTypeId, @Hide, @MakeDefault, @CreatedOn)",
+                            new
+                            {
+                                AgentId = agentId,
+                                PaymentTypeId = PaymentType.PaymentTypeId,
+                                Hide = PaymentType.Hide,
+                                MakeDefault = PaymentType.MakeDefault,
+                                CreatedOn = DateTime.Now
+                            });
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Agent FATCAEntityGIINChallenge Disabled
+        public async Task<IEnumerable<AgentFATCAEntityGIINChallengeViewModel>> GetAgentFATCAEntityGIINChallengeDisabledByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as FATCAEntityTypeId, C.Name,AC.AgentId FROM FATCAEntityTypes C 
+                 left JOIN AgentFATCAEntityGIINChallenge_Disabled AC ON C.Id = AC.FATCAEntityTypeId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentFATCAEntityGIINChallengeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task UpsertAgentFATCAEntityGIINChallengeDisabledAsync(int agentId, List<int> existingAgentFATCAEntityTypeIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentFATCAEntityGIINChallengeDisabled = await connection.QueryAsync<int>
+                    ("SELECT FATCAEntityTypeId FROM AgentFATCAEntityGIINChallenge_Disabled WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var ExemptionCodeToDelete = existingAgentFATCAEntityGIINChallengeDisabled.Except(existingAgentFATCAEntityTypeIds);
+                var ExemptionCodeToAdd = existingAgentFATCAEntityTypeIds.Except(existingAgentFATCAEntityGIINChallengeDisabled);
+
+                if (ExemptionCodeToDelete.Any())
+                {
+                    connection.Execute("delete from AgentFATCAEntityGIINChallenge_Disabled WHERE AgentId = @AgentId AND FATCAEntityTypeId IN @existingAgentFATCAEntityTypeIds",
+                        new { AgentId = agentId, existingAgentFATCAEntityTypeIds = ExemptionCodeToDelete });
+                }
+
+                var AgentFATCAEntityGIINChallengeDisabled = ExemptionCodeToAdd.Select
+                    (FATCAEntityTypeId => new AgentFATCAEntityGIINChallengeDisabled
+                    {
+                        AgentId = agentId,
+                        FATCAEntityTypeId = FATCAEntityTypeId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentFATCAEntityGIINChallengeDisabled.Any())
+                {
+                    connection.Execute("INSERT INTO AgentFATCAEntityGIINChallenge_Disabled(AgentId, FATCAEntityTypeId, CreatedOn) " +
+                        "VALUES (@AgentId, @FATCAEntityTypeId, @CreatedOn)",
+                        AgentFATCAEntityGIINChallengeDisabled);
+                }
+            }
+        }
+        #endregion
+
+        #region Agent SPTQuestion Hidden
+        public async Task<IEnumerable<AgentSPTQuestionViewModel>> GetAgentSPTQuestionHiddenByAgentIdAsync(int agentId)
+        {
+            var sql = @"  SELECT C.Id as SPTQuestionId, C.Name,AC.AgentId,
+AC.Alias,AC.Hidden FROM SPTQuestions C 
+                 left JOIN AgentSPTQuestion_Hidden AC ON C.Id = AC.SPTQuestionId 
+                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentSPTQuestionViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+        public async Task UpsertAgentSPTQuestionHiddenAsync(int agentId, List<AgentSPTQuestionInsertModel> existingAgentSPTQuestions)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentSPTQuestionHidden = await connection.QueryAsync<AgentSPTQuestionHidden>("SELECT AgentId,SPTQuestionId, Alias, Hidden FROM AgentSPTQuestion_Hidden WHERE AgentId = @AgentId",
+                    new { AgentId = agentId });
+
+                var SPTQuestionIdsToDelete = existingAgentSPTQuestionHidden
+          .Where(d => !existingAgentSPTQuestions.Any(e => e.SPTQuestionId == d.SPTQuestionId)
+        //  || (!d.IsUSSubmission && !d.IsSelfCertification 
+        || existingAgentSPTQuestions.Any(e => e.SPTQuestionId == d.SPTQuestionId &&
+        !e.Hidden && string.IsNullOrEmpty(e.Alias)))
+          .Select(d => d.SPTQuestionId);
+
+                var SPTQuestionIdsToAdd = existingAgentSPTQuestions
+                    .Where(e => !existingAgentSPTQuestionHidden.Any(d => d.SPTQuestionId == e.SPTQuestionId))
+                    .Select(e => e.SPTQuestionId);
+
+                if (SPTQuestionIdsToDelete.Any())
+                {
+                    connection.Execute("DELETE FROM AgentSPTQuestion_Hidden WHERE AgentId = @AgentId AND SPTQuestionId IN @existingAgentSPTQuestionsIds",
+                        new { AgentId = agentId, existingAgentSPTQuestionsIds = SPTQuestionIdsToDelete });
+                }
+
+                foreach (var SPTQuestion in existingAgentSPTQuestions)
+                {
+                    var existingSPTQuestion = existingAgentSPTQuestionHidden.FirstOrDefault
+                        (d => d.SPTQuestionId == SPTQuestion.SPTQuestionId);
+
+                    if (existingSPTQuestion != null)
+                    {
+                        //if (!existingSPTQuestion.IsUSSubmission || !existingSPTQuestion.IsSelfCertification)
+                        //{
+                            existingSPTQuestion.Alias = SPTQuestion.Alias;
+                            existingSPTQuestion.Hidden = SPTQuestion.Hidden;
+
+                            connection.Execute("UPDATE AgentSPTQuestion_Hidden SET Alias = @Alias, Hidden = @Hidden,ModifiedOn=@ModifiedOn WHERE AgentId = @AgentId AND SPTQuestionId = @SPTQuestionId",
+                                new
+                                {
+                                    AgentId = agentId,
+                                    SPTQuestionId = existingSPTQuestion.SPTQuestionId,
+                                    Alias = existingSPTQuestion.Alias,
+                                    Hidden = existingSPTQuestion.Hidden,
+                                    ModifiedOn = DateTime.Now
+                                });
+                        //}
+                    }
+                    else
+                    {
+                        connection.Execute("INSERT INTO AgentSPTQuestion_Hidden (AgentId,SPTQuestionId,Alias, Hidden, CreatedOn) " +
+                            "VALUES (@AgentId, @SPTQuestionId, @Alias, @Hidden, @CreatedOn)",
+                            new
+                            {
+                                AgentId = agentId,
+                                SPTQuestionId = SPTQuestion.SPTQuestionId,
+                                Alias = SPTQuestion.Alias,
+                                Hidden = SPTQuestion.Hidden,
+                                CreatedOn = DateTime.Now
+                            });
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

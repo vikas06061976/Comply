@@ -64,5 +64,24 @@ namespace ComplyExchangeCMS.Domain.Services
         Task UpsertAgentUSVisaTypeHiddenAsync(int agentId, List<int> existingAgentUSVisaTypes);
         #endregion
 
+        #region Agent FATCAExemptionCode Hidden
+        Task<IEnumerable<AgentFATCAExemptionCodeViewModel>> GetAgentFATCAExemptionCodeHiddenByAgentIdAsync(int agentId);
+        Task UpsertAgentFATCAExemptionCodeHiddenAsync(int agentId, List<int> existingAgentFATCAExemptionCodes);
+        #endregion
+
+        #region Agent PaymentType
+        Task<IEnumerable<AgentPaymentTypeViewModel>> GetAgentPaymentTypeByAgentIdAsync(int agentId);
+        Task UpsertAgentPaymentTypeAsync(int agentId, List<AgentPaymentTypeInsertModel> existingAgentPaymentTypes);
+        #endregion
+
+        #region Agent FATCAEntityGIINChallenge Disabled
+        Task<IEnumerable<AgentFATCAEntityGIINChallengeViewModel>> GetAgentFATCAEntityGIINChallengeDisabledByAgentIdAsync(int agentId);
+        Task UpsertAgentFATCAEntityGIINChallengeDisabledAsync(int agentId, List<int> existingAgentFATCAEntityGIINChallenges);
+        #endregion
+
+        #region Agent SPTQuestion Hidden
+        Task<IEnumerable<AgentSPTQuestionViewModel>> GetAgentSPTQuestionHiddenByAgentIdAsync(int agentId);
+        Task UpsertAgentSPTQuestionHiddenAsync(int agentId, List<AgentSPTQuestionInsertModel> existingAgentSPTQuestions);
+        #endregion
     }
 }
