@@ -1,4 +1,5 @@
 ﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
@@ -52,7 +53,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
         public async Task<int> UpdatePages(PageUpdateModel pagesModel)
         {
             pagesModel.ModifiedOn = DateTime.UtcNow;
@@ -78,17 +78,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
-        //public async Task<IReadOnlyList<PageViewModel>> GetAllAsync()
-        //{
-        //    var sql = "SELECT * FROM Pages where IsActive=1 and IsDeleted=0";
-        //    using (var connection = CreateConnection())
-        //    {
-        //        var result = await connection.QueryAsync<PageViewModel>(sql);
-        //        return result.ToList();
-        //    }
-        //}
-
         public async Task<PaginationResponse<PageViewModel>> GetAllAsync
             (PaginationRequest request, string searchName)
         {
@@ -100,7 +89,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 IQueryable<PageViewModel> pages = connection.Query<PageViewModel>
-                    ($@"SELECT * FROM Pages where ParentId is NULL and IsActive=1 and IsDeleted=0").AsQueryable();
+                    ($@"SELECT p1.Id, p1.Name, p1.ParentId, p1.DisplayOnTopMenu, p1.RedirectPageLabelToURL, p1.MenuBackgroundColor, p1.UnselectedTextColor, p1.SelectedTextColor, p1.DisplayOnFooter, p1.DisplayOnLeftMenu, p1.PageContent, p1.Summary, p1.CreatedOn, p1.IsDeleted, p1.IsActive, p1.ModifiedOn, COUNT(p2.Id) AS SubpageCount FROM Pages p1 LEFT JOIN Pages p2 ON p1.Id = p2.ParentId where p1.ParentId is NULL and p1.IsActive=1 and p1.IsDeleted=0 GROUP BY p1.Id, p1.Name, p1.ParentId, p1.DisplayOnTopMenu, p1.RedirectPageLabelToURL, p1.MenuBackgroundColor, p1.UnselectedTextColor, p1.SelectedTextColor, p1.DisplayOnFooter, p1.DisplayOnLeftMenu, p1.PageContent, p1.Summary, p1.CreatedOn, p1.IsDeleted, p1.IsActive, p1.ModifiedOn").AsQueryable();
                 // and (name={searchName})
 
                 // Apply search filter
@@ -120,9 +109,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                                 case "name":
                                     pages = pages.OrderBy(f => f.Name);
                                     break;
-                                case "subpage":
-                                    pages = pages.OrderBy(f => f.SubPage);
-                                    break;
                                 case "parent":
                                     pages = pages.OrderBy(f => f.Parent);
                                     break;
@@ -135,9 +121,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                             {
                                 case "name":
                                     pages = pages.OrderByDescending(f => f.Name);
-                                    break;
-                                case "subpage":
-                                    pages = pages.OrderByDescending(f => f.SubPage);
                                     break;
                                 case "parent":
                                     pages = pages.OrderByDescending(f => f.Parent);
@@ -176,17 +159,15 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
         public async Task<int> DeleteAsync(int id)
         {
-            var sql = "DELETE FROM Pages WHERE Id = @Id";
+            var sql = "Delete from PageTranslations where PageId=@Id;Delete from Pages where ParentId=@Id; Delete from Pages where Id=@Id;";
             using (var connection = CreateConnection())
             {
                 var result = await connection.ExecuteAsync(sql, new { Id = id });
                 return result;
             }
         }
-
         public async Task<PageViewModel> GetByNameAsync(string name)
         {
             var sql = "SELECT * FROM Pages WHERE Name like '%'+@Name+'%' and IsActive=1 and IsDeleted=0";
@@ -196,7 +177,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
         public async Task<IReadOnlyList<PageDropDownViewModel>> GetByParentIdAsync()
         {
             var sql = "select * from Pages where ParentId is null and IsActive=1 and IsDeleted=0";
@@ -206,7 +186,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result.ToList();
             }
         }
-
         public async Task<int> InsertSubPage(PageInsertModel pagesModel)
         {
             pagesModel.CreatedOn = DateTime.UtcNow;
@@ -234,7 +213,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
         public async Task<int> GetCountBySubPageIdAsync(int Id)
         {
             var sql = "select count(1) from Pages where ParentId=@Id and IsActive=1 and IsDeleted=0";
@@ -275,7 +253,15 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
+        public async Task<IReadOnlyList<PageLanguageView>> GetAllLanguage(int pageId)
+        {
+            var sql = "select pt.LanguageId,l.Name,pt.PageId from Languages as l left join PageTranslations as pt on l.Id=pt.LanguageId where pt.PageId=@pageId or pt.PageId is null";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<PageLanguageView>(sql, new { pageId = pageId });
+                return result.ToList();
+            }
+        }
 
     }
 }

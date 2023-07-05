@@ -1,17 +1,14 @@
-﻿using ComplyExchangeCMS.Domain.Entities.Masters;
+﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.Documentation;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using ComplyExchangeCMS.Domain.Models.Documentation;
-using ComplyExchangeCMS.Domain.Models.Pages;
-using ComplyExchangeCMS.Domain;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -22,21 +19,19 @@ namespace ComplyExchangeCMS.Persistence.Services
         {
             _configuration = configuration; 
         }
-
         public IDbConnection CreateConnection()
         {
             return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
-        //public async Task<IReadOnlyList<DocumentationView>> GetAllAsync()
-        //{
-        //    var sql = "select * from Documentations where IsActive=1";
-        //    using (var connection = CreateConnection())
-        //    {
-        //        var result = await connection.QueryAsync<DocumentationView>(sql);
-        //        return result.ToList();
-        //    }
-        //}
-
+        public async Task<IReadOnlyList<DocumentationType>> GetDocumentTypes()
+        {
+            var sql = "SELECT Id,Name FROM DocumentTypes where IsActive=1";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<DocumentationType>(sql);
+                return result.ToList();
+            }
+        }
         public async Task<PaginationResponse<DocumentationView>> GetAllAsync(PaginationRequest request, string searchName)
         {
             using (var connection = CreateConnection())
@@ -101,7 +96,6 @@ namespace ComplyExchangeCMS.Persistence.Services
                 };
             }
         }
-
         public async Task<int> InsertDocument(DocumentationInsert documentModel)
         {
             documentModel.CreatedOn = DateTime.UtcNow;
@@ -155,6 +149,44 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
+        public async Task<int> InsertDocumentTranslation(DocumentTranslationInsert documentationsModel)
+        {
+            documentationsModel.CreatedOn = DateTime.UtcNow;
+            documentationsModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
 
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@Content", documentationsModel.Content, DbType.String);
+                parameters.Add("@DocId", documentationsModel.DocId, DbType.Int32);
+                parameters.Add("@LanguageId", documentationsModel.LanguageId, DbType.Int32);
+                parameters.Add("@BulkTranslation", documentationsModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", documentationsModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", documentationsModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationDocumentation", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<DocumentationTranslationView> GetDocumentTranslation(int docId, int languageId)
+        {
+            var sql = "select * from DocumentationTranslations where DocId=@docId and LanguageId=@languageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<DocumentationTranslationView>(sql, new { docId = docId, languageId = languageId });
+                return result;
+            }
+        }
+        public async Task<IReadOnlyList<DocTranslationView>> GetAllLanguage(int docId)
+        {
+            var sql = "select dt.LanguageId,l.Name,dt.DocId from Languages as l left join DocumentationTranslations as dt on l.Id=dt.LanguageId where dt.DocId=@docId or dt.DocId is null";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<DocTranslationView>(sql, new { docId = docId });
+                return result.ToList();
+            }
+        }
     }
 }

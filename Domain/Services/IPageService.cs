@@ -13,7 +13,7 @@ namespace ComplyExchangeCMS.Domain.Services
     {
         Task<int> Insert(PageInsertModel pagesModel);
         Task<int> UpdatePages(PageUpdateModel pagesModel);
-        //Task<IReadOnlyList<PageViewModel>> GetAllAsync();
+        Task<IReadOnlyList<PageLanguageView>> GetAllLanguage(int pageId);
         Task<PageViewModel> GetByIdAsync(int id);
         Task<int> DeleteAsync(int id);
         Task<PageViewModel> GetByNameAsync(string name);

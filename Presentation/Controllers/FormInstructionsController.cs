@@ -1,14 +1,9 @@
-﻿ using System.Threading.Tasks; 
-using Microsoft.AspNetCore.Mvc; 
-using ComplyExchangeCMS.Domain.Entities.Masters;
-using Domain.Services;
-using ComplyExchangeCMS.Domain.Entities;
-using ComplyExchangeCMS.Domain.Models.Documentation;
-using ComplyExchangeCMS.Domain.Models.LOB;
-using ComplyExchangeCMS.Domain;
-using System.Threading;
-using ComplyExchangeCMS.Domain.Models.Capacities;
+﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.FormInstructions;
+using Domain.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -49,14 +44,14 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         public async Task<IActionResult> CreateFormInstructions(FormInstructionsInsert formInsModel)
         {
             await unitOfWork.FormInstructionsService.InsertFormInstruction(formInsModel);
-            return Ok("Capacity saved successfully.");
+            return Ok("Form Instruction saved successfully.");
         }
 
         [HttpPut("UpdateFormInstructions")]
         public async Task<IActionResult> UpdateFormInstructions(FormInstructionsUpdate formInsModel)
         {
             await unitOfWork.FormInstructionsService.UpdateFormInstruction(formInsModel);
-            return Ok("Capacity updated successfully.");
+            return Ok("Form Instruction updated successfully.");
         }
 
         [HttpDelete("DeleteFormInstructions")]

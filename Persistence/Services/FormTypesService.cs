@@ -1,4 +1,5 @@
 ﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.Documentation;
 using ComplyExchangeCMS.Domain.Models.FormTypes;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
@@ -160,14 +161,47 @@ namespace ComplyExchangeCMS.Persistence.Services
                 };
             }
         }
-
-
         public async Task<FormTypesView> GetByIdAsync(int id)
         {
             var sql = "SELECT * FROM FormTypesSelfCertifications WHERE Id = @Id and IsActive=1 and IsDeleted=0";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QuerySingleOrDefaultAsync<FormTypesView>(sql, new { Id = id });
+                return result;
+            }
+        }
+
+        public async Task<int> InsertFormTypeSelfCertiTranslation(FormTypeSelfCertiTranslationInsert formTypeSCModel)
+        {
+            formTypeSCModel.CreatedOn = DateTime.UtcNow;
+            formTypeSCModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@IntroductionText", formTypeSCModel.IntroductionText, DbType.String);
+                parameters.Add("@FormSCId", formTypeSCModel.FormSCId, DbType.Int32);
+                parameters.Add("@LanguageId", formTypeSCModel.LanguageId, DbType.Int32);
+                parameters.Add("@TINPageText", formTypeSCModel.TINPageText, DbType.String);
+                parameters.Add("@CertificationText", formTypeSCModel.CertificationText, DbType.String);
+                parameters.Add("@ESignatureText", formTypeSCModel.ESignatureText, DbType.String);
+                parameters.Add("@ESignatureConfirmationText", formTypeSCModel.ESignatureConfirmationText, DbType.String);
+                parameters.Add("@BulkTranslation", formTypeSCModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", formTypeSCModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", formTypeSCModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertFormTypeSCTranslation", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<FormTypeSelfCertiTranslationView> GetFormTypeSCTranslation(int formSCId, int languageId)
+        {
+            var sql = "SELECT [Id] ,[IntroductionText] ,[FormSCId] ,[LanguageId] ,[TINPageText] ,[CertificationText] ,[ESignatureText] ,[ESignatureConfirmationText] ,[BulkTranslation] ,[CreatedOn] ,[ModifiedOn] FROM [dbo].[FormTypeSelfCertificatesTranslations] where FormSCId=@FormSCId and LanguageId=@languageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<FormTypeSelfCertiTranslationView>(sql, new { FormSCId = formSCId, languageId = languageId });
                 return result;
             }
         }
@@ -217,6 +251,38 @@ namespace ComplyExchangeCMS.Persistence.Services
             using (var connection = CreateConnection())
             {
                 var result = await connection.QuerySingleOrDefaultAsync<FormTypesUSCertiView>(sql, new { Id = id });
+                return result;
+            }
+        }
+
+        public async Task<int> InsertFormTypeUSCTranslation(FormTypesUSCTranslationInsert formTypeUSCModel)
+        {
+            formTypeUSCModel.CreatedOn = DateTime.UtcNow;
+            formTypeUSCModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@Description", formTypeUSCModel.Description, DbType.String);
+                parameters.Add("@FormUSCId", formTypeUSCModel.FormUSCId, DbType.Int32);
+                parameters.Add("@LanguageId", formTypeUSCModel.LanguageId, DbType.Int32);
+                parameters.Add("@SubstituteStatement", formTypeUSCModel.SubstituteStatement, DbType.String);
+                parameters.Add("@BulkTranslation", formTypeUSCModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", formTypeUSCModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", formTypeUSCModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertFormTypeUSCTranslation", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<FormTypesUSCTranslationView> GetFormTypeUSCTranslation(int formUSCId, int languageId)
+        {
+            var sql = "SELECT [Id] ,[Description] ,[FormUSCId] ,[LanguageId] ,[SubstituteStatement] ,[BulkTranslation] ,[CreatedOn] ,[ModifiedOn] FROM [dbo].[FormTypeUSCertificatesTranslations] where FormUSCId=@FormUSCId and LanguageId=@languageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<FormTypesUSCTranslationView>(sql, new { FormUSCId = formUSCId, languageId = languageId });
                 return result;
             }
         }

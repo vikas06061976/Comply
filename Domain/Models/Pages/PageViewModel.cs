@@ -10,7 +10,7 @@ namespace ComplyExchangeCMS.Domain.Models.Pages
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string SubPage { get; set; }
+        public string SubpageCount { get; set; }
         public string Parent { get; set; }
         public bool DisplayOnTopMenu { get; set; }
         public bool DisplayOnFooter { get; set; }

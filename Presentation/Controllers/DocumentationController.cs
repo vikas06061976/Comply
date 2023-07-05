@@ -6,6 +6,7 @@ using ComplyExchangeCMS.Domain.Entities;
 using ComplyExchangeCMS.Domain.Models.Documentation;
 using ComplyExchangeCMS.Domain;
 using System.Threading;
+using ComplyExchangeCMS.Domain.Models.Pages;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -59,11 +60,42 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
+        [HttpGet("GetDocumentationTypes")]
+        public async Task<IActionResult> GetDocumentationTypes()
+        {
+            var data = await unitOfWork.Documentation.GetDocumentTypes();
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+
         [HttpDelete("DocumentationDelete")]
         public async Task<IActionResult> Delete(int id)
         {
             var data = await unitOfWork.Documentation.DeleteDocument(id);
             return Ok(data);
         }
+
+        [HttpPost("InsertDocTranslation")]
+        public async Task<IActionResult> InsertDocTranslation(DocumentTranslationInsert documentModel)
+        {
+            await unitOfWork.Documentation.InsertDocumentTranslation(documentModel);
+            return Ok("Documentation Translation updated successfully.");
+        }
+
+        [HttpGet("GetDocTranslation")]
+        public async Task<IActionResult> GetDocTranslation(int docId, int languageId)
+        {
+            var data = await unitOfWork.Documentation.GetDocumentTranslation(docId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllDocLanguage(int docId)
+        {
+            var data = await unitOfWork.Documentation.GetAllLanguage(docId);
+            return Ok(data);
+        }
+
     }
 }

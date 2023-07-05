@@ -21,6 +21,7 @@ namespace Domain.Services
         IAgentEditListService AgentEditListService { get; }
         IRuleService RuleService { get; }
         IEasyHelpService EasyHelpService { get; }
+        ISettingService SettingService { get; }
 
     }
 }

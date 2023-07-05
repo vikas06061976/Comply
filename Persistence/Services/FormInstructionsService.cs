@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using ComplyExchangeCMS.Domain.Models.FormInstructions;
+using ComplyExchangeCMS.Domain.Models.Documentation;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -146,6 +147,5 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-
     }
 }

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace ComplyExchangeCMS.Domain.Models.Documentation
 {
-    public class DocumentationView
+    public class DocumentTranslationInsert
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int DocumentTypeId { get; set; }
+        public string Content { get; set; }
+        public int DocId { get; set; }
+        public int LanguageId { get; set; }
+        public bool BulkTranslation { get; set; }
         public DateTime CreatedOn { get; set; }
-        public bool IsActive { get; set; }
         public DateTime ModifiedOn { get; set; }
     }
 }

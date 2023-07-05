@@ -55,11 +55,6 @@ namespace ComplyExchangeCMS.Presentation.Controllers
 
               return Ok(pages);
           }
-          //public async Task<IActionResult> GetAll()
-          //{
-          //    var data = await unitOfWork.Pages.GetAllAsync();
-          //    return Ok(data);
-          //}
 
         [HttpGet("GetPageById")]
         public async Task<IActionResult> GetById(int id)
@@ -119,6 +114,13 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         {
             var data = await unitOfWork.Pages.GetPageTranslation(pageId, languageId);
             if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int pageId)
+        {
+            var data = await unitOfWork.Pages.GetAllLanguage(pageId);
             return Ok(data);
         }
     }
