@@ -19,6 +19,7 @@ namespace Domain.Services
         ICapacitiesService CapacitiesService { get; }
         IFormInstructionsService FormInstructionsService { get; }
         IAgentEditListService AgentEditListService { get; }
+        IAgentUSSourceIncomeService AgentUSSourceIncomeService { get; }
         IRuleService RuleService { get; }
         IEasyHelpService EasyHelpService { get; }
         ISettingService SettingService { get; }

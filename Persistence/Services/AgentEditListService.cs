@@ -39,8 +39,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         public async Task<IEnumerable<AgentCountriesViewModel>> GetAgentCountriesHiddenByAgentIdAsync(int agentId)
         {
             var sql = @"  SELECT C.Id as CountryId, C.Name,AC.AgentId FROM Countries C 
-                 left JOIN AgentCountries_Hidden AC ON C.Id = AC.CountryId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 left JOIN AgentCountries_Hidden AC ON C.Id = AC.CountryId and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentCountriesViewModel>(sql, new { agentId = agentId });
@@ -86,8 +85,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         public async Task<IEnumerable<AgentCountriesViewModel>> GetAgentCountriesImportantByAgentIdAsync(int agentId)
         {
             var sql = @"  SELECT C.Id as CountryId, C.Name,AC.AgentId FROM Countries C 
-                 left JOIN AgentCountries_Important AC ON C.Id = AC.CountryId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 left JOIN AgentCountries_Important AC ON C.Id = AC.CountryId  and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentCountriesViewModel>(sql, new { agentId = agentId });
@@ -132,8 +130,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         public async Task<IEnumerable<AgentCapacityHiddenViewModel>> GetAgentCapacityHiddenByAgentIdAsync(int agentId)
         {
             var sql = @"  SELECT C.Id as CapacityId, C.Name,AC.AgentId FROM Capacities C 
-                 left JOIN AgentCapacity_Hidden AC ON C.Id = AC.CapacityId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 left JOIN AgentCapacity_Hidden AC ON C.Id = AC.CapacityId  and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentCapacityHiddenViewModel>(sql, new { agentId = agentId });
@@ -180,8 +177,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         public async Task<IEnumerable<AgentChapter3EntityTypeViewModel>> GetAgentChapter3EntityTypeHiddenByAgentIdAsync(int agentId)
         {
             var sql = @"  SELECT C.Id as Chapter3EntityTypeId, C.Name,AC.AgentId FROM Chapter3EntityTypes C 
-                 left JOIN AgentChapter3EntityType_Hidden AC ON C.Id = AC.Chapter3EntityTypeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 left JOIN AgentChapter3EntityType_Hidden AC ON C.Id = AC.Chapter3EntityTypeId  and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentChapter3EntityTypeViewModel>(sql, new { agentId = agentId });
@@ -228,8 +224,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         public async Task<IEnumerable<AgentChapter4EntityTypeViewModel>> GetAgentChapter4EntityTypeHiddenByAgentIdAsync(int agentId)
         {
             var sql = @"  SELECT C.Id as Chapter4EntityTypeId, C.Name,AC.AgentId FROM Chapter4EntityTypes C 
-                 left JOIN AgentChapter4EntityType_Hidden AC ON C.Id = AC.Chapter4EntityTypeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 left JOIN AgentChapter4EntityType_Hidden AC ON C.Id = AC.Chapter4EntityTypeId  and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentChapter4EntityTypeViewModel>(sql, new { agentId = agentId });
@@ -275,9 +270,9 @@ namespace ComplyExchangeCMS.Persistence.Services
         #region Agent Chapter4EntityType Important
         public async Task<IEnumerable<AgentChapter4EntityTypeViewModel>> GetAgentChapter4EntityTypeImportantByAgentIdAsync(int agentId)
         {
-            var sql = @"  SELECT C.Id as Chapter4EntityTypeId, C.Name,AC.AgentId FROM Chapter4EntityTypes C 
+            var sql = @" SELECT C.Id as Chapter4EntityTypeId, C.Name,AC.AgentId FROM Chapter4EntityTypes C 
                  left JOIN AgentChapter4EntityType_Important AC ON C.Id = AC.Chapter4EntityTypeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                   and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentChapter4EntityTypeViewModel>(sql, new { agentId = agentId });
@@ -326,7 +321,7 @@ namespace ComplyExchangeCMS.Persistence.Services
             var sql = @"  SELECT C.Id as DocumentationId, C.Name,AC.AgentId,
 AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C 
                  left JOIN AgentDocumentation_Mandatory AC ON C.Id = AC.DocumentationId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentDocumentationMandatoryViewModel>(sql, new { agentId = agentId });
@@ -402,7 +397,7 @@ AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C
         {
             var sql = @"  SELECT C.Id as ExemptionCodeId, C.Name,AC.AgentId FROM ExemptionCodes C 
                  left JOIN AgentExemptionCode_Disabled AC ON C.Id = AC.ExemptionCodeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentExemptionCodeViewModel>(sql, new { agentId = agentId });
@@ -450,7 +445,7 @@ AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C
         {
             var sql = @"SELECT C.Id as IncomeCodeId, C.Name,AC.AgentId FROM IncomeCodes C 
                  left JOIN AgentIncomeCode_Hidden AC ON C.Id = AC.IncomeCodeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                 and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentIncomeCodeViewModel>(sql, new { agentId = agentId });
@@ -499,7 +494,7 @@ AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C
         {
             var sql = @"  SELECT C.Id as USVisaTypeId, C.Name,AC.AgentId FROM USVisaTypes C 
                  left JOIN AgentUSVisaType_Hidden AC ON C.Id = AC.USVisaTypeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentUSVisaTypeViewModel>(sql, new { agentId = agentId });
@@ -547,7 +542,7 @@ AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C
         {
             var sql = @"  SELECT C.Id as FATCAExemptionCodeId, C.Name,AC.AgentId FROM FATCAExemptionCodes C 
                  left JOIN AgentFATCAExemptionCode_Hidden AC ON C.Id = AC.FATCAExemptionCodeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentFATCAExemptionCodeViewModel>(sql, new { agentId = agentId });
@@ -596,7 +591,7 @@ AC.IsUSSubmission,AC.IsSelfCertification FROM Documentations C
             var sql = @"  SELECT C.Id as PaymentTypeId, C.Name,AC.AgentId,
 AC.Hide,AC.MakeDefault FROM PaymentTypes C 
                  left JOIN Agent_PaymentTypes AC ON C.Id = AC.PaymentTypeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+              and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentPaymentTypeViewModel>(sql, new { agentId = agentId });
@@ -672,7 +667,7 @@ AC.Hide,AC.MakeDefault FROM PaymentTypes C
         {
             var sql = @"  SELECT C.Id as FATCAEntityTypeId, C.Name,AC.AgentId FROM FATCAEntityTypes C 
                  left JOIN AgentFATCAEntityGIINChallenge_Disabled AC ON C.Id = AC.FATCAEntityTypeId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+                and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentFATCAEntityGIINChallengeViewModel>(sql, new { agentId = agentId });
@@ -721,7 +716,7 @@ AC.Hide,AC.MakeDefault FROM PaymentTypes C
             var sql = @"  SELECT C.Id as SPTQuestionId, C.Name,AC.AgentId,
 AC.Alias,AC.Hidden FROM SPTQuestions C 
                  left JOIN AgentSPTQuestion_Hidden AC ON C.Id = AC.SPTQuestionId 
-                  WHERE AC.AgentId =@agentId or AC.AgentId is null ";
+             and AC.AgentId =@agentId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<AgentSPTQuestionViewModel>(sql, new { agentId = agentId });
