@@ -25,7 +25,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         {
             return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
-        public async Task<int> InsertSetting(SettingInsertModel settingModel)
+        public async Task<int> UpsertSetting(SettingInsertModel settingModel)
         {
             settingModel.CreatedOn = DateTime.UtcNow;
             settingModel.ModifiedOn = DateTime.UtcNow;
@@ -40,6 +40,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 parameters.Add("@DefaultCoverPagePdf_FileName", "", DbType.String);
                 parameters.Add("@LengthOfConfirmationCode", settingModel.LengthOfConfirmationCode, DbType.Int32);
                 parameters.Add("@DefaultLogoType", settingModel.DefaultLogoType, DbType.String);
+                parameters.Add("@DefaultLogo_FileName", settingModel.DefaultLogo_FileName, DbType.String);
                 parameters.Add("@GoogleTranslateAPIKey", settingModel.GoogleTranslateAPIKey, DbType.String);
                 parameters.Add("@PurgeRedundantSubmissionData", settingModel.PurgeRedundantSubmissionData, DbType.String);
                 parameters.Add("@RunExchangeInIframe", settingModel.RunExchangeInIframe, DbType.Boolean);
@@ -49,7 +50,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 parameters.Add("@ActivateNonEmailPINprocess", settingModel.ActivateNonEmailPINprocess, DbType.Boolean);
                 parameters.Add("@BlockForeignCharacterInput", settingModel.BlockForeignCharacterInput, DbType.Boolean);
                 parameters.Add("@CreatedOn", settingModel.CreatedOn, DbType.DateTime);
-                parameters.Add("@ModifiedOn", settingModel.ModifiedOn, DbType.DateTime);
+                parameters.Add("@ModifedOn", settingModel.ModifiedOn, DbType.DateTime);
 
                 var result = await connection.QueryFirstOrDefaultAsync<int>("InsertSetting", parameters, commandType: CommandType.StoredProcedure);
                 return result;
@@ -101,7 +102,17 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-        public async Task<int> InsertSettingTranslation(SettingInsertTranslation settingModel)
+
+        public async Task<IReadOnlyCollection<QuestionView>> GetQuestions()
+        {
+            var sql = "SELECT [Id], [Question], [QuestionHint] FROM Questions";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<QuestionView>(sql);
+                return result.ToList();
+            }
+        }
+        public async Task<int> InsertQuestionTranslation(QuestionTranslationInsert settingModel)
         {
             settingModel.CreatedOn = DateTime.UtcNow;
             settingModel.ModifiedOn = DateTime.UtcNow;
@@ -111,23 +122,25 @@ namespace ComplyExchangeCMS.Persistence.Services
 
                 // Create the parameters for the stored procedure
                 var parameters = new DynamicParameters();
+
                 parameters.Add("@Content", settingModel.Content, DbType.String);
-                parameters.Add("@SettingId", settingModel.SettingId, DbType.Int32);
+                parameters.Add("@QuestionId", settingModel.QuestionId, DbType.Int32);
+                parameters.Add("@QuestionHintId", settingModel.QuestionHintId, DbType.Int32);
                 parameters.Add("@LanguageId", settingModel.LanguageId, DbType.Int32);
                 parameters.Add("@BulkTranslation", settingModel.BulkTranslation, DbType.Boolean);
                 parameters.Add("@CreatedOn", settingModel.CreatedOn, DbType.DateTime);
                 parameters.Add("@ModifiedOn", settingModel.ModifiedOn, DbType.DateTime);
 
-                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationDocumentation", parameters, commandType: CommandType.StoredProcedure);
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationQuestion", parameters, commandType: CommandType.StoredProcedure);
                 return result;
             }
         }
-        public async Task<SettingViewTranslation> GetSettingTranslation(int settingId, int languageId)
+        public async Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId)
         {
-            var sql = "select * from DocumentationTranslations where DocId=@docId and LanguageId=@languageId";
+            var sql = "SELECT * FROM QuestionsTranslations where (QuestionId= @QuestionId or QuestionHintId = @QuestionHintId) and LanguageId=@languageId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QuerySingleOrDefaultAsync<SettingViewTranslation>(sql, new { docId = settingId, languageId = languageId });
+                var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionId = questionId, QuestionHintId= questionHintId, languageId = languageId });
                 return result;
             }
         }

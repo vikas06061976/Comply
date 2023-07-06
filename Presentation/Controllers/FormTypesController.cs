@@ -83,10 +83,10 @@ namespace ComplyExchangeCMS.Presentation.Controllers
 
 
         [HttpPut("UpdateUSC")]
-        public async Task<IActionResult> UpdateUSFormType([FromForm] FormTypesUpdate formTypesModel)
+        public async Task<IActionResult> UpdateUSFormType([FromForm] FormTypesUSCertiUpdate formTypesModel)
         {
-            await unitOfWork.FormTypes.Update(formTypesModel);
-            return Ok("FormType updated successfully.");
+            await unitOfWork.FormTypes.UpdateUSCertificate(formTypesModel);
+            return Ok("Form types (United States Certificates) updated successfully.");
         }
 
         [HttpGet("GetAllUSFormTypes")]
