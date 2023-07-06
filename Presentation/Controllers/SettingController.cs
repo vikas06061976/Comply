@@ -16,11 +16,11 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        [HttpPost("InsertSetting")]
+        [HttpPost("UpsertSetting")]
         public async Task<IActionResult> CreateSetting([FromForm]SettingInsertModel settingModel)
         {
-            await unitOfWork.SettingService.InsertSetting(settingModel);
-            return Ok("Setting created successfully.");
+            await unitOfWork.SettingService.UpsertSetting(settingModel);
+            return Ok("Setting updated successfully.");
         }
 
         [HttpGet("GetSetting")]
@@ -31,19 +31,27 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
-        /*[HttpPost("InsertSettingTranslation")]
-        public async Task<IActionResult> InsertSettingTranslation(SettingInsertTranslation settingModel)
+        [HttpGet("GetQuestion")]
+        public async Task<IActionResult> GetQuestion()
         {
-            await unitOfWork.SettingService.InsertSettingTranslation(settingModel);
-            return Ok("Setting Translation updated successfully.");
-        }
-
-        [HttpGet("GetSettingTranslation")]
-        public async Task<IActionResult> GetSettingTranslation(int settingId, int languageId)
-        {
-            var data = await unitOfWork.SettingService.GetSettingTranslation(settingId, languageId);
+            var data = await unitOfWork.SettingService.GetQuestions();
             if (data == null) return Ok();
             return Ok(data);
-        }*/
+        }
+
+        [HttpPost("InsertQuestionTranslation")]
+        public async Task<IActionResult> InsertQuestionTranslation(QuestionTranslationInsert questionModel)
+        {
+            await unitOfWork.SettingService.InsertQuestionTranslation(questionModel);
+            return Ok("Question Translation updated successfully.");
+        }
+
+        [HttpGet("GetQuestionTranslation")]
+        public async Task<IActionResult> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId)
+        {
+            var data = await unitOfWork.SettingService.GetQuestionTranslation(questionId, questionHintId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
     }
 }
