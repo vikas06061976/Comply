@@ -1,5 +1,6 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.FormTypes;
+using ComplyExchangeCMS.Domain.Models.Pages;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -63,6 +64,21 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
+        [HttpPost("InsertFormTypeSelfCertiTranslation")]
+        public async Task<IActionResult> InsertFormTypeSelfCertiTranslation(FormTypeSelfCertiTranslationInsert formTypeSCModel)
+        {
+            await unitOfWork.FormTypes.InsertFormTypeSelfCertiTranslation(formTypeSCModel);
+            return Ok("FormType Self Certificate Translation updated successfully.");
+        }
+
+        [HttpGet("GetFormTypeSelfCertiTranslation")]
+        public async Task<IActionResult> GetFormTypeSelfCertiTranslation(int formTypeId, int languageId)
+        {
+            var data = await unitOfWork.FormTypes.GetFormTypeSCTranslation(formTypeId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+
         #region Form Type US Certification
 
 
@@ -84,6 +100,21 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         public async Task<IActionResult> GetByIdUSFormType(int id)
         {
             var data = await unitOfWork.FormTypes.GetByIdUSCertificate(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpPost("InsertFormTypeUSCTranslation")]
+        public async Task<IActionResult> InsertFormTypeUSCTranslation(FormTypesUSCTranslationInsert formTypeUSCModel)
+        {
+            await unitOfWork.FormTypes.InsertFormTypeUSCTranslation(formTypeUSCModel);
+            return Ok("FormType US Certificate Translation updated successfully.");
+        }
+
+        [HttpGet("GetFormTypeUSCTranslation")]
+        public async Task<IActionResult> GetFormTypeUSCTranslation(int formTypeId, int languageId)
+        {
+            var data = await unitOfWork.FormTypes.GetFormTypeUSCTranslation(formTypeId, languageId);
             if (data == null) return Ok();
             return Ok(data);
         }

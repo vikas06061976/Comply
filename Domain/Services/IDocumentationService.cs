@@ -9,11 +9,14 @@ namespace ComplyExchangeCMS.Domain.Services
 {
     public interface IDocumentationService
     {
-        //Task<IReadOnlyList<DocumentationView>> GetAllAsync();
+        Task<int> InsertDocumentTranslation(DocumentTranslationInsert documentationsModel);
         Task<PaginationResponse<DocumentationView>> GetAllAsync(PaginationRequest request, string searchName);
         Task<int> InsertDocument(DocumentationInsert documentModel);
         Task<int> UpdateDocument(DocumentationUpdate documentModel);
         Task<int> DeleteDocument(int Id);
         Task<DocumentationView> GetByIdAsync(int Id);
+        Task<DocumentationTranslationView> GetDocumentTranslation(int docId, int languageId);
+        Task<IReadOnlyList<DocTranslationView>> GetAllLanguage(int docId);
+        Task<IReadOnlyList<DocumentationType>> GetDocumentTypes();
     }
 }

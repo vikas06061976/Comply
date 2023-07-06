@@ -11,11 +11,14 @@ namespace ComplyExchangeCMS.Domain.Services
     {
         Task<int> Insert(FormTypesInsert formTypesModel);
         Task<int> Update(FormTypesUpdate formTypesModel);
-        //Task<IReadOnlyList<FormTypesView>> GetAllAsync();
         Task<PaginationResponse<FormTypesView>> GetAllAsync(PaginationRequest request, string searchName);
         Task<FormTypesView> GetByIdAsync(int id);
         Task<int> UpdateUSCertificate(FormTypesUSCertiUpdate formTypesUSCerti);
         Task<IReadOnlyList<FormTypesUSCertiView>> GetAllUSCertificate();
         Task<FormTypesUSCertiView> GetByIdUSCertificate(int id);
+        Task<FormTypesUSCTranslationView> GetFormTypeUSCTranslation(int formUSCId, int languageId);
+        Task<int> InsertFormTypeUSCTranslation(FormTypesUSCTranslationInsert formTypeUSCModel);
+        Task<FormTypeSelfCertiTranslationView> GetFormTypeSCTranslation(int formSCId, int languageId);
+        Task<int> InsertFormTypeSelfCertiTranslation(FormTypeSelfCertiTranslationInsert formTypeSCModel);
     }
 }

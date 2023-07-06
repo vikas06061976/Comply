@@ -22,6 +22,7 @@ namespace Domain.Services
         IAgentUSSourceIncomeService AgentUSSourceIncomeService { get; }
         IRuleService RuleService { get; }
         IEasyHelpService EasyHelpService { get; }
+        ISettingService SettingService { get; }
 
     }
 }
