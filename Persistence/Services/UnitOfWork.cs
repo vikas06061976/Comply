@@ -21,13 +21,20 @@ namespace ComplyExchangeCMS.Persistence.Services
         public IAgentEditListService AgentEditListService { get; }
         public IRuleService RuleService { get; }
         public IEasyHelpService EasyHelpService { get; }
+        public IAgentFormTypeService AgentFormTypeService { get; }
+        public IAgentUSSourceIncomeService AgentUSSourceIncomeService { get; }
+        
         public UnitOfWork(IProductService productService, IPageService pageService,
             IContentManagementService contentManagementService, IAgentService agentService,
             ICountryService countryService, ILanguageService languageService,
             IFormTypesService formTypesService, IDocumentationService documentationService,
             ILOBService lOBService, ICapacitiesService capacitiesService,
             IFormInstructionsService formInstructionsService,
-             IAgentEditListService agentEditListService, IRuleService ruleService, IEasyHelpService easyHelpService)
+             IAgentEditListService agentEditListService,
+             IRuleService ruleService, IEasyHelpService easyHelpService,
+             IAgentFormTypeService agentFormTypeService,
+             IAgentUSSourceIncomeService agentUSSourceIncomeService
+            )
         {
             Products = productService;
             Pages = pageService;
@@ -43,6 +50,8 @@ namespace ComplyExchangeCMS.Persistence.Services
             AgentEditListService = agentEditListService;
             RuleService = ruleService;
             EasyHelpService = easyHelpService;
+            AgentFormTypeService = agentFormTypeService;
+            AgentUSSourceIncomeService = agentUSSourceIncomeService;
         }
     }
 }
