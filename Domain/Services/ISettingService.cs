@@ -9,9 +9,10 @@ namespace ComplyExchangeCMS.Domain.Services
 {
     public interface ISettingService
     {
-        Task<int> InsertSetting(SettingInsertModel settingModel);
+        Task<int> UpsertSetting(SettingInsertModel settingModel);
         Task<SettingViewModel> GetSetting();
-        Task<int> InsertSettingTranslation(SettingInsertTranslation settingModel);
-        Task<SettingViewTranslation> GetSettingTranslation(int settingId, int languageId);
+        Task<IReadOnlyCollection<QuestionView>> GetQuestions();
+        Task<int> InsertQuestionTranslation(QuestionTranslationInsert settingModel);
+        Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId);
     }
 }
