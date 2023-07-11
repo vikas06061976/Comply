@@ -18,6 +18,7 @@ namespace ComplyExchangeCMS.Domain.Models.FormTypes
         public PDFTemplate ESubmitPDFTemplateId { get; set; }
         public PDFTemplate PrintPDFTemplateId { get; set; }
         public IFormFile Logo { get; set; }
+        public string LogoPath { get; set; }
         public string IntroductionText { get; set; }
         public string TINPageText { get; set; }
         public string CertificationText { get; set; }

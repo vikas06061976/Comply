@@ -1,7 +1,10 @@
 ﻿using ComplyExchangeCMS.Domain.Models.Settings;
 using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -10,15 +13,63 @@ namespace ComplyExchangeCMS.Presentation.Controllers
     public class SettingController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
-
-        public SettingController(IUnitOfWork unitOfWork)
+        private readonly IHostingEnvironment _environment;
+        public SettingController(IUnitOfWork unitOfWork, IHostingEnvironment environment)
         {
             this.unitOfWork = unitOfWork;
+            _environment = environment;
         }
 
         [HttpPost("UpsertSetting")]
         public async Task<IActionResult> CreateSetting([FromForm]SettingInsertModel settingModel)
         {
+            #region DefaultCoverPage Image
+            if (settingModel.DefaultCoverPagePdf == null || settingModel.DefaultCoverPagePdf.Length == 0)
+                return BadRequest("No image selected");
+
+            // Generate a unique filename for the uploaded image
+            var fileName = Path.GetFileNameWithoutExtension(settingModel.DefaultCoverPagePdf.FileName);
+            var fileExtension = Path.GetExtension(settingModel.DefaultCoverPagePdf.FileName);
+            var uniqueFileName = $"{fileName}_{Path.GetRandomFileName()}{fileExtension}";
+
+            // Save the image to the specified path
+            var imagePath = Path.Combine(_environment.ContentRootPath, "SettingImages");
+            Directory.CreateDirectory(imagePath);
+            var filePath = Path.Combine(imagePath, settingModel.DefaultCoverPagePdf.FileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await settingModel.DefaultCoverPagePdf.CopyToAsync(fileStream);
+            }
+
+            // Update the LogoPath property with the saved image path
+            settingModel.DefaultCoverPagePdf_FileName = fileName;
+            #endregion
+
+            #region DefaultLogo Image
+            if (settingModel.DefaultLogo == null || settingModel.DefaultLogo.Length == 0)
+                return BadRequest("No image selected");
+
+            // Generate a unique filename for the uploaded image
+            var logofileName = Path.GetFileNameWithoutExtension(settingModel.DefaultLogo.FileName);
+            var logofileExtension = Path.GetExtension(settingModel.DefaultLogo.FileName);
+            var logouniqueFileName = $"{logofileName}_{Path.GetRandomFileName()}{logofileExtension}";
+
+            // Save the image to the specified path
+            var logoimagePath = Path.Combine(_environment.ContentRootPath, "SettingImages");
+            var subfolderName = "LogoImages";
+            var subfolderPath = Path.Combine(logoimagePath, subfolderName);
+            Directory.CreateDirectory(subfolderPath);
+
+            var logofilePath = Path.Combine(subfolderPath, settingModel.DefaultLogo.FileName);
+            using (var fileStream = new FileStream(logofilePath, FileMode.Create))
+            {
+                await settingModel.DefaultLogo.CopyToAsync(fileStream);
+            }
+
+            // Update the LogoPath property with the saved image path
+            settingModel.DefaultLogo_FileName = logofileName;
+            #endregion
+
             await unitOfWork.SettingService.UpsertSetting(settingModel);
             return Ok("Setting updated successfully.");
         }

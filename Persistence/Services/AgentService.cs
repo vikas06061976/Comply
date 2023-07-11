@@ -43,7 +43,8 @@ namespace ComplyExchangeCMS.Persistence.Services
                 parameters.Add("@DefaultSelection", agents.DefaultSelection, DbType.Int32);
                 parameters.Add("@DefaultLanguageId", agents.DefaultLanguageId, DbType.Int32);
                 parameters.Add("@IncludeDefaultEnglish", agents.IncludeDefaultEnglish, DbType.Boolean);
-                parameters.Add("@Logo", agents.LogoId, DbType.String);
+                parameters.Add("@Logo", agents.LogoId, DbType.Int32);
+                parameters.Add("@LogoImage", agents.Logo_ImagePath, DbType.String);
                 parameters.Add("@LogoNavigateURL", agents.LogoNavigateURL, DbType.String);
                 parameters.Add("@PDFWatermark", agents.PDFWatermark, DbType.String);
                 parameters.Add("@DisplayVersion", agents.DisplayVersion, DbType.String);

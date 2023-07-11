@@ -78,6 +78,43 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
+        /* public async Task<PaginationResponse<PageViewModel>> GetAllAsync(PaginationRequest request, string searchName)
+           {
+               using (var connection = CreateConnection())
+               {
+                   if (connection.State == ConnectionState.Closed)
+                   {
+                       connection.Open();
+                   }
+
+                   var parameters = new
+                   {
+                       PageSize = request.PageSize,
+                       PageNumber = request.PageNumber,
+                       SearchName = searchName,
+                       SortColumn = request.SortColumn,
+                       SortDirection = request.SortDirection
+                   };
+
+                   var result = await connection.QueryMultipleAsync(
+                       "GetAllPages",
+                       parameters,
+                       commandType: CommandType.StoredProcedure
+                   );
+
+                   var totalRecords = await result.ReadSingleAsync<int>();
+                   var totalPages = await result.ReadSingleAsync<int>();
+                   var records = await result.ReadAsync<PageViewModel>();
+
+                   return new PaginationResponse<PageViewModel>
+                   {
+                       TotalRecords = totalRecords,
+                       TotalPages = totalPages,
+                       Records = records.ToList()
+                   };
+               }
+           }*/
+
         public async Task<PaginationResponse<PageViewModel>> GetAllAsync
             (PaginationRequest request, string searchName)
         {
@@ -89,7 +126,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
 
                 IQueryable<PageViewModel> pages = connection.Query<PageViewModel>
-                    ($@"SELECT p1.Id, p1.Name, p1.ParentId, p1.DisplayOnTopMenu, p1.RedirectPageLabelToURL, p1.MenuBackgroundColor, p1.UnselectedTextColor, p1.SelectedTextColor, p1.DisplayOnFooter, p1.DisplayOnLeftMenu, p1.PageContent, p1.Summary, p1.CreatedOn, p1.IsDeleted, p1.IsActive, p1.ModifiedOn, COUNT(p2.Id) AS SubpageCount FROM Pages p1 LEFT JOIN Pages p2 ON p1.Id = p2.ParentId where p1.ParentId is NULL and p1.IsActive=1 and p1.IsDeleted=0 GROUP BY p1.Id, p1.Name, p1.ParentId, p1.DisplayOnTopMenu, p1.RedirectPageLabelToURL, p1.MenuBackgroundColor, p1.UnselectedTextColor, p1.SelectedTextColor, p1.DisplayOnFooter, p1.DisplayOnLeftMenu, p1.PageContent, p1.Summary, p1.CreatedOn, p1.IsDeleted, p1.IsActive, p1.ModifiedOn").AsQueryable();
+                    ($@"SELECT distinct STUFF(( SELECT ',' + CAST(innerTable.LanguageId AS varchar(100)) FROM PageTranslations AS innerTable WHERE innerTable.pageid = pt.pageid FOR XML PATH('') ),1,1,'') AS LanguageIds, p1.Id, p1.Name, p1.ParentId, p1.DisplayOnTopMenu, p1.RedirectPageLabelToURL, p1.MenuBackgroundColor, p1.UnselectedTextColor, p1.SelectedTextColor, p1.DisplayOnFooter, p1.DisplayOnLeftMenu, p1.PageContent, p1.Summary, p1.CreatedOn, p1.IsDeleted, p1.IsActive, p1.ModifiedOn, dbo.CountSubPages(p1.Id) AS SubpageCount FROM Pages p1 LEFT JOIN PageTranslations as pt ON P1.Id=pt.PageId where p1.ParentId is NULL and p1.IsActive=1 and p1.IsDeleted=0").AsQueryable();
                 // and (name={searchName})
 
                 // Apply search filter

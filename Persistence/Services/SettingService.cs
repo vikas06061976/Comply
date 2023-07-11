@@ -37,7 +37,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 var parameters = new DynamicParameters();
 
                 parameters.Add("@Id", settingModel.Id, DbType.Int32);
-                parameters.Add("@DefaultCoverPagePdf_FileName", "", DbType.String);
+                parameters.Add("@DefaultCoverPagePdf_FileName", settingModel.DefaultCoverPagePdf_FileName, DbType.String);
                 parameters.Add("@LengthOfConfirmationCode", settingModel.LengthOfConfirmationCode, DbType.Int32);
                 parameters.Add("@DefaultLogoType", settingModel.DefaultLogoType, DbType.String);
                 parameters.Add("@DefaultLogo_FileName", settingModel.DefaultLogo_FileName, DbType.String);

@@ -11,9 +11,11 @@ namespace ComplyExchangeCMS.Domain.Models.Settings
     public class SettingInsertModel
     {
         public int Id { get; set; }
-        //public IFormFile DefaultCoverPagePdf_FileName { get; set; }
+        public IFormFile DefaultCoverPagePdf { get; set; }
+        public string DefaultCoverPagePdf_FileName { get; set; }
         public int LengthOfConfirmationCode { get; set; }
         public Logo DefaultLogoType { get; set; }
+        public IFormFile DefaultLogo { get; set; }
         public string DefaultLogo_FileName { get; set; }
         public string GoogleTranslateAPIKey { get; set; }
         public string PurgeRedundantSubmissionData { get; set; }

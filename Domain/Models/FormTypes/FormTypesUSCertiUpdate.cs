@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,10 @@ namespace ComplyExchangeCMS.Domain.Models.FormTypes
         public string ESubmitStatement { get; set; }
         public Logo PrintTemplatePDFId { get; set; }
         public Logo ESubmitTemplatePDFId { get; set; }
+        public IFormFile PrintTemplatePDF { get; set; }
+        public IFormFile ESubmitTemplatePDF { get; set; }
+        public string PrintTemplatePDF_ImagePath { get; set; }
+        public string ESubmitTemplatePDF_ImagePath { get; set; }
         public bool UseOnboardingURL { get; set; }
         public string SpecifyURL { get; set; }
         public bool IsActive { get; set; }

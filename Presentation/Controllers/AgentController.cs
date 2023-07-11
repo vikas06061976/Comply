@@ -6,6 +6,9 @@ using ComplyExchangeCMS.Domain.Entities;
 using ComplyExchangeCMS.Domain.Models.Agent;
 using ComplyExchangeCMS.Domain;
 using System.Threading;
+using System.IO;
+using System;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -14,15 +17,38 @@ namespace ComplyExchangeCMS.Presentation.Controllers
     public class AgentController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
-
-        public AgentController(IUnitOfWork unitOfWork)
+        private readonly IHostingEnvironment _environment;
+        public AgentController(IUnitOfWork unitOfWork, IHostingEnvironment environment)
         {
             this.unitOfWork = unitOfWork;
+            _environment = environment;
         }
 
         [HttpPost("Create")]
         public async Task<IActionResult> CreateAgent(AgentInsert agents)
-        {
+        {/*
+            #region Logo Image
+            if (agents.Logo == null || agents.Logo.Length == 0)
+                return BadRequest("No image selected");
+
+            // Generate a unique filename for the uploaded image
+            var fileName = Path.GetFileNameWithoutExtension(agents.Logo.FileName);
+            var fileExtension = Path.GetExtension(agents.Logo.FileName);
+            var uniqueFileName = $"{fileName}_{Path.GetRandomFileName()}{fileExtension}";
+
+            // Save the image to the specified path
+            var imagePath = Path.Combine(_environment.ContentRootPath, "AgentImages");
+            Directory.CreateDirectory(imagePath);
+            var filePath = Path.Combine(imagePath, agents.Logo.FileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await agents.Logo.CopyToAsync(fileStream);
+            }
+
+            // Update the LogoPath property with the saved image path
+            agents.Logo_ImagePath = fileName;
+            #endregion
+            */
             await unitOfWork.Agents.Insert(agents);
             return Ok("Agent created successfully.");
         }
@@ -40,6 +66,7 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         //    var data = await unitOfWork.Agents.GetAllAsync();
         //    return Ok(data);
         //}
+        // create method for adding 2 numbers
 
         public async Task<IActionResult> GetAll(string searchTerm, int pageNumber, int pageSize, string sortColumn,
         string sortDirection, CancellationToken cancellationToken = default)
