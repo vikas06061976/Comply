@@ -20,5 +20,7 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<int> InsertFormTypeUSCTranslation(FormTypesUSCTranslationInsert formTypeUSCModel);
         Task<FormTypeSelfCertiTranslationView> GetFormTypeSCTranslation(int formSCId, int languageId);
         Task<int> InsertFormTypeSelfCertiTranslation(FormTypeSelfCertiTranslationInsert formTypeSCModel);
+        Task<IReadOnlyList<SelfFormLanguageView>> GetAllLanguage(int selfFormId);
+        Task<IReadOnlyList<USFormLanguageView>> GetAllUSLanguage(int usFormId);
     }
 }

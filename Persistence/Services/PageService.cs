@@ -292,7 +292,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         }
         public async Task<IReadOnlyList<PageLanguageView>> GetAllLanguage(int pageId)
         {
-            var sql = "select pt.LanguageId,l.Name,pt.PageId from Languages as l left join PageTranslations as pt on l.Id=pt.LanguageId where pt.PageId=@pageId or pt.PageId is null";
+            var sql = "select l.Id,l.Name,pt.PageId from Languages as l left join PageTranslations as pt on l.Id=pt.LanguageId AND pt.PageId = @pageId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<PageLanguageView>(sql, new { pageId = pageId });

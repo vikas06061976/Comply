@@ -11,6 +11,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ComplyExchangeCMS.Domain.Services;
 using ComplyExchangeCMS.Domain.Models.Settings;
+using ComplyExchangeCMS.Common;
+using ComplyExchangeCMS.Domain.Models.ContentBlock;
+using static ComplyExchangeCMS.Common.Enums;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -49,6 +52,9 @@ namespace ComplyExchangeCMS.Persistence.Services
                 parameters.Add("@ReSendTokenEmailFeature", settingModel.ReSendTokenEmailFeature, DbType.Boolean);
                 parameters.Add("@ActivateNonEmailPINprocess", settingModel.ActivateNonEmailPINprocess, DbType.Boolean);
                 parameters.Add("@BlockForeignCharacterInput", settingModel.BlockForeignCharacterInput, DbType.Boolean);
+                parameters.Add("@TwilioAuthToken", settingModel.TwilioAuthToken, DbType.String);
+                parameters.Add("@TwilioAccountSid", settingModel.TwilioAccountSid, DbType.String);
+                parameters.Add("@TwilioSMSFromMobileNumber", settingModel.TwilioSMSFromMobileNumber, DbType.String);
                 parameters.Add("@CreatedOn", settingModel.CreatedOn, DbType.DateTime);
                 parameters.Add("@ModifedOn", settingModel.ModifiedOn, DbType.DateTime);
 
@@ -57,42 +63,42 @@ namespace ComplyExchangeCMS.Persistence.Services
             }
         }
 
-       /* public async Task<int> UpdateSetting(SettingUpdateModel settingModel)
-        {
-            settingModel.ModifiedOn = DateTime.UtcNow;
-            using (var connection = CreateConnection())
-            {
-                connection.Open();
+        /* public async Task<int> UpdateSetting(SettingUpdateModel settingModel)
+         {
+             settingModel.ModifiedOn = DateTime.UtcNow;
+             using (var connection = CreateConnection())
+             {
+                 connection.Open();
 
-                // Create the parameters for the stored procedure
-                var parameters = new DynamicParameters();
-                parameters.Add("@Id", settingModel.Id, DbType.Int32);
-                parameters.Add("@DefaultCoverPagePdf_FileName", settingModel.DefaultCoverPagePdf_FileName, DbType.String);
-                parameters.Add("@LengthOfConfirmationCode", settingModel.LengthOfConfirmationCode, DbType.Int32);
-                parameters.Add("@DefaultLogoType", settingModel.DefaultLogoType, DbType.String);
-                parameters.Add("@GoogleTranslateAPIKey", settingModel.GoogleTranslateAPIKey, DbType.String);
-                parameters.Add("@PurgeRedundantSubmissionData", settingModel.PurgeRedundantSubmissionData, DbType.String);
-                parameters.Add("@RunExchangeInIframe", settingModel.RunExchangeInIframe, DbType.Boolean);
-                parameters.Add("@DefaultRetroactiveStatement", settingModel.DefaultRetroactiveStatement, DbType.String);
-                parameters.Add("@UnderMaintenance", settingModel.UnderMaintenance, DbType.Boolean);
-                parameters.Add("@ReSendTokenEmailFeature", settingModel.ReSendTokenEmailFeature, DbType.Boolean);
-                parameters.Add("@ActivateNonEmailPINprocess", settingModel.ActivateNonEmailPINprocess, DbType.Boolean);
-                parameters.Add("@BlockForeignCharacterInput", settingModel.BlockForeignCharacterInput, DbType.Boolean);
-                parameters.Add("@ModifiedOn", settingModel.ModifiedOn, DbType.DateTime);
+                 // Create the parameters for the stored procedure
+                 var parameters = new DynamicParameters();
+                 parameters.Add("@Id", settingModel.Id, DbType.Int32);
+                 parameters.Add("@DefaultCoverPagePdf_FileName", settingModel.DefaultCoverPagePdf_FileName, DbType.String);
+                 parameters.Add("@LengthOfConfirmationCode", settingModel.LengthOfConfirmationCode, DbType.Int32);
+                 parameters.Add("@DefaultLogoType", settingModel.DefaultLogoType, DbType.String);
+                 parameters.Add("@GoogleTranslateAPIKey", settingModel.GoogleTranslateAPIKey, DbType.String);
+                 parameters.Add("@PurgeRedundantSubmissionData", settingModel.PurgeRedundantSubmissionData, DbType.String);
+                 parameters.Add("@RunExchangeInIframe", settingModel.RunExchangeInIframe, DbType.Boolean);
+                 parameters.Add("@DefaultRetroactiveStatement", settingModel.DefaultRetroactiveStatement, DbType.String);
+                 parameters.Add("@UnderMaintenance", settingModel.UnderMaintenance, DbType.Boolean);
+                 parameters.Add("@ReSendTokenEmailFeature", settingModel.ReSendTokenEmailFeature, DbType.Boolean);
+                 parameters.Add("@ActivateNonEmailPINprocess", settingModel.ActivateNonEmailPINprocess, DbType.Boolean);
+                 parameters.Add("@BlockForeignCharacterInput", settingModel.BlockForeignCharacterInput, DbType.Boolean);
+                 parameters.Add("@ModifiedOn", settingModel.ModifiedOn, DbType.DateTime);
 
-                var result = await connection.QueryFirstOrDefaultAsync<int>("UpdateDocumentation", parameters, commandType: CommandType.StoredProcedure);
-                return result;
-            }
-        }
-        public async Task<int> DeleteDocument(int Id)
-        {
-            var sql = "DELETE FROM Documentations WHERE Id = @Id";
-            using (var connection = CreateConnection())
-            {
-                var result = await connection.ExecuteAsync(sql, new { Id = Id });
-                return result;
-            }
-        }*/
+                 var result = await connection.QueryFirstOrDefaultAsync<int>("UpdateDocumentation", parameters, commandType: CommandType.StoredProcedure);
+                 return result;
+             }
+         }
+         public async Task<int> DeleteDocument(int Id)
+         {
+             var sql = "DELETE FROM Documentations WHERE Id = @Id";
+             using (var connection = CreateConnection())
+             {
+                 var result = await connection.ExecuteAsync(sql, new { Id = Id });
+                 return result;
+             }
+         }*/
         public async Task<SettingViewModel> GetSetting()
         {
             var sql = "SELECT * FROM Settings";
@@ -140,9 +146,28 @@ namespace ComplyExchangeCMS.Persistence.Services
             var sql = "SELECT * FROM QuestionsTranslations where (QuestionId= @QuestionId or QuestionHintId = @QuestionHintId) and LanguageId=@languageId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionId = questionId, QuestionHintId= questionHintId, languageId = languageId });
+                var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionId = questionId, QuestionHintId = questionHintId, languageId = languageId });
                 return result;
             }
         }
+
+        #region Validation
+        //private static void ValidateResult(SettingInsertModel item)
+        //{
+        //    if (!EnumHelperMethods.EnumContainValue(item.DefaultLogoType))
+        //    {
+        //        throw new Exception("Type is invalid.");
+        //    }
+        //    if (item.DefaultLogoType == Logo.Upload)
+        //    {
+        //        if (string.IsNullOrEmpty(item.DefaultLogo))
+        //        {
+        //            throw new Exception("DefaultLogoType can't be blank");
+        //        }
+        //    }
+        //}
+
+        #endregion
     }
 }
+

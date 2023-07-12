@@ -9,6 +9,7 @@ using System.Threading;
 using System.IO;
 using System;
 using Microsoft.AspNetCore.Hosting;
+using ComplyExchangeCMS.Domain.Models.EasyHelp;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -96,6 +97,27 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var data = await unitOfWork.Agents.DeleteAsync(id);
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int agentId)
+        {
+            var data = await unitOfWork.Agents.GetAllLanguage(agentId);
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentTranslation")]
+        public async Task<IActionResult> InsertAgentTranslation(AgentTranslationUpsert agentModel)
+        {
+            await unitOfWork.Agents.InsertAgentTranslation(agentModel);
+            return Ok("Agent translation updated successfully.");
+        }
+
+        [HttpGet("GetAgentTranslation")]
+        public async Task<IActionResult> GetAgentTranslation(int agentId, int languageId)
+        {
+            var data = await unitOfWork.Agents.GetAgentTranslation(agentId, languageId);
+            if (data == null) return Ok();
             return Ok(data);
         }
     }

@@ -45,6 +45,10 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         [HttpPut("UpdateEasyHelp")]
         public async Task<IActionResult> UpdateEasyHelp(EasyHelpUpdate easyHelpModel)
         {
+            //check id is exist or not
+            var data = await unitOfWork.EasyHelpService.GetByIdAsync(easyHelpModel.Id);
+            if (data == null) 
+            return Ok("EasyHelp not found.");
             await unitOfWork.EasyHelpService.UpdateEasyHelp(easyHelpModel);
             return Ok("EasyHelp updated successfully.");
         }
@@ -63,7 +67,7 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             var data = await unitOfWork.EasyHelpService.DeleteEasyHelp(id);
             return Ok(data);
         }
-        [HttpPost("InsertEasyHelpTranslation")]
+        [HttpPost("UpsertEasyHelpTranslation")]
         public async Task<IActionResult> InsertEasyHelpTranslation(EasyHelpTranslation easyHelpModel)
         {
             await unitOfWork.EasyHelpService.InsertEasyHelpTranslation(easyHelpModel);
@@ -75,6 +79,13 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         {
             var data = await unitOfWork.EasyHelpService.GetEasyHelpTranslation(easyHelpId, languageId);
             if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int easyHelpId)
+        {
+            var data = await unitOfWork.EasyHelpService.GetAllLanguage(easyHelpId);
             return Ok(data);
         }
     }

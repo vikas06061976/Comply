@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ComplyExchangeCMS.Domain.Models.Rules;
 using ComplyExchangeCMS.Domain.Services;
+using ComplyExchangeCMS.Domain.Models.EasyHelp;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -180,6 +181,16 @@ namespace ComplyExchangeCMS.Persistence.Services
             {
                 var result = await connection.QuerySingleOrDefaultAsync<RuleTranslationView>(sql, new { ruleId = ruleId, languageId = languageId });
                 return result;
+            }
+        }
+
+        public async Task<IReadOnlyList<RuleLanguageView>> GetAllLanguage(int ruleId)
+        {
+            var sql = "select l.Id,l.Name,rt.RulesId from Languages as l left join RulesTranslations as rt on l.Id=rt.LanguageId AND rt.RulesId = @RulesId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<RuleLanguageView>(sql, new { RulesId = ruleId });
+                return result.ToList();
             }
         }
 

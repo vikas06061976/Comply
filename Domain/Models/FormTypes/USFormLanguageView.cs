@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ComplyExchangeCMS.Domain.Models.Pages
+namespace ComplyExchangeCMS.Domain.Models.FormTypes
 {
-    public class PageLanguageView
+    public class USFormLanguageView
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int PageId { get; set; }
+        public int FormUSCId { get; set; }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.EasyHelp;
 using ComplyExchangeCMS.Domain.Models.FormTypes;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using Domain.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using static ComplyExchangeCMS.Common.Enums;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -104,6 +107,13 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
+        [HttpGet("GetAllSelfLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int scFormId)
+        {
+            var data = await unitOfWork.FormTypes.GetAllLanguage(scFormId);
+            return Ok(data);
+        }
+
         #region Form Type US Certification
 
 
@@ -111,53 +121,60 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         public async Task<IActionResult> UpdateUSFormType([FromForm] FormTypesUSCertiUpdate formTypesModel)
         {
             #region PrintTemplatePDF Images
-            if (formTypesModel.PrintTemplatePDF == null || formTypesModel.PrintTemplatePDF.Length == 0)
-                return BadRequest("No image selected");
-
-            // Generate a unique filename for the uploaded image
-            var fileName = Path.GetFileNameWithoutExtension(formTypesModel.PrintTemplatePDF.FileName);
-            var fileExtension = Path.GetExtension(formTypesModel.PrintTemplatePDF.FileName);
-            var uniqueFileName = $"{fileName}_{Path.GetRandomFileName()}{fileExtension}";
-
-            // Save the image to the specified path
-            var imagePath = Path.Combine(_environment.ContentRootPath, "FormTypeImages");
-            var subfolderName = "PrintTempUSCertificationImages";
-            var subfolderPath = Path.Combine(imagePath, subfolderName);
-            Directory.CreateDirectory(subfolderPath);
-
-            var filePath = Path.Combine(subfolderPath, formTypesModel.PrintTemplatePDF.FileName);
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            if(formTypesModel.PrintTemplatePDFId== Common.Enums.Logo.Upload)
             {
-                await formTypesModel.PrintTemplatePDF.CopyToAsync(fileStream);
-            }
+                if (formTypesModel.PrintTemplatePDF == null || formTypesModel.PrintTemplatePDF.Length == 0)
+                    return BadRequest("Please upload print template pdf");
 
-            // Update the LogoPath property with the saved image path
-            formTypesModel.PrintTemplatePDF_ImagePath = fileName;
+                // Generate a unique filename for the uploaded image
+                var fileName = Path.GetFileNameWithoutExtension(formTypesModel.PrintTemplatePDF.FileName);
+                var fileExtension = Path.GetExtension(formTypesModel.PrintTemplatePDF.FileName);
+                var uniqueFileName = $"{fileName}_{Path.GetRandomFileName()}{fileExtension}";
+
+                // Save the image to the specified path
+                var imagePath = Path.Combine(_environment.ContentRootPath, "FormTypeImages");
+                var subfolderName = "PrintTempUSCertificationImages";
+                var subfolderPath = Path.Combine(imagePath, subfolderName);
+                Directory.CreateDirectory(subfolderPath);
+
+                var filePath = Path.Combine(subfolderPath, formTypesModel.PrintTemplatePDF.FileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await formTypesModel.PrintTemplatePDF.CopyToAsync(fileStream);
+                }
+
+                // Update the LogoPath property with the saved image path
+                formTypesModel.PrintTemplatePDF_ImagePath = fileName;
+
+            }
             #endregion
 
             #region ESubmitTemplatePDF Images
-            if (formTypesModel.ESubmitTemplatePDF == null || formTypesModel.ESubmitTemplatePDF.Length == 0)
-                return BadRequest("No image selected");
-
-            // Generate a unique filename for the uploaded image
-            var ESubfileName = Path.GetFileNameWithoutExtension(formTypesModel.ESubmitTemplatePDF.FileName);
-            var ESubfileExtension = Path.GetExtension(formTypesModel.ESubmitTemplatePDF.FileName);
-            var ESubuniqueFileName = $"{ESubfileName}_{Path.GetRandomFileName()}{ESubfileExtension}";
-
-            // Save the image to the specified path
-            var ESubimagePath = Path.Combine(_environment.ContentRootPath, "FormTypeImages");
-            var EsubfolderName = "EsubmitUSCertificationImages";
-            var EsubfolderPath = Path.Combine(ESubimagePath, EsubfolderName);
-            Directory.CreateDirectory(EsubfolderPath);
-
-            var ESubfilePath = Path.Combine(EsubfolderPath, formTypesModel.ESubmitTemplatePDF.FileName);
-            using (var fileStream = new FileStream(ESubfilePath, FileMode.Create))
+            if (formTypesModel.ESubmitTemplatePDFId == Common.Enums.Logo.Upload)
             {
-                await formTypesModel.PrintTemplatePDF.CopyToAsync(fileStream);
-            }
+                if (formTypesModel.ESubmitTemplatePDF == null || formTypesModel.ESubmitTemplatePDF.Length == 0)
+                    return BadRequest("No image selected");
 
-            // Update the LogoPath property with the saved image path
-            formTypesModel.ESubmitTemplatePDF_ImagePath = ESubfileName;
+                // Generate a unique filename for the uploaded image
+                var ESubfileName = Path.GetFileNameWithoutExtension(formTypesModel.ESubmitTemplatePDF.FileName);
+                var ESubfileExtension = Path.GetExtension(formTypesModel.ESubmitTemplatePDF.FileName);
+                var ESubuniqueFileName = $"{ESubfileName}_{Path.GetRandomFileName()}{ESubfileExtension}";
+
+                // Save the image to the specified path
+                var ESubimagePath = Path.Combine(_environment.ContentRootPath, "FormTypeImages");
+                var EsubfolderName = "EsubmitUSCertificationImages";
+                var EsubfolderPath = Path.Combine(ESubimagePath, EsubfolderName);
+                Directory.CreateDirectory(EsubfolderPath);
+
+                var ESubfilePath = Path.Combine(EsubfolderPath, formTypesModel.ESubmitTemplatePDF.FileName);
+                using (var fileStream = new FileStream(ESubfilePath, FileMode.Create))
+                {
+                    await formTypesModel.PrintTemplatePDF.CopyToAsync(fileStream);
+                }
+
+                // Update the LogoPath property with the saved image path
+                formTypesModel.ESubmitTemplatePDF_ImagePath = ESubfileName;
+            }
             #endregion
             await unitOfWork.FormTypes.UpdateUSCertificate(formTypesModel);
             return Ok("Form types (United States Certificates) updated successfully.");
@@ -190,6 +207,13 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         {
             var data = await unitOfWork.FormTypes.GetFormTypeUSCTranslation(formTypeId, languageId);
             if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllUSLanguage")]
+        public async Task<IActionResult> GetAllUSLanguage(int usFormId)
+        {
+            var data = await unitOfWork.FormTypes.GetAllUSLanguage(usFormId);
             return Ok(data);
         }
 

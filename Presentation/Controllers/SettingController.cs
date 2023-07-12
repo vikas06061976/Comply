@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using static ComplyExchangeCMS.Common.Enums;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -46,28 +47,32 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             #endregion
 
             #region DefaultLogo Image
-            if (settingModel.DefaultLogo == null || settingModel.DefaultLogo.Length == 0)
-                return BadRequest("No image selected");
 
-            // Generate a unique filename for the uploaded image
-            var logofileName = Path.GetFileNameWithoutExtension(settingModel.DefaultLogo.FileName);
-            var logofileExtension = Path.GetExtension(settingModel.DefaultLogo.FileName);
-            var logouniqueFileName = $"{logofileName}_{Path.GetRandomFileName()}{logofileExtension}";
+            if (settingModel.DefaultLogoType == Logo.Upload)
+            { 
+                if (settingModel.DefaultLogo == null || settingModel.DefaultLogo.Length == 0)
+                    return BadRequest("Please upload data on default logo.");
 
-            // Save the image to the specified path
-            var logoimagePath = Path.Combine(_environment.ContentRootPath, "SettingImages");
-            var subfolderName = "LogoImages";
-            var subfolderPath = Path.Combine(logoimagePath, subfolderName);
-            Directory.CreateDirectory(subfolderPath);
+                // Generate a unique filename for the uploaded image
+                var logofileName = Path.GetFileNameWithoutExtension(settingModel.DefaultLogo.FileName);
+                var logofileExtension = Path.GetExtension(settingModel.DefaultLogo.FileName);
+                var logouniqueFileName = $"{logofileName}_{Path.GetRandomFileName()}{logofileExtension}";
 
-            var logofilePath = Path.Combine(subfolderPath, settingModel.DefaultLogo.FileName);
-            using (var fileStream = new FileStream(logofilePath, FileMode.Create))
-            {
-                await settingModel.DefaultLogo.CopyToAsync(fileStream);
+                // Save the image to the specified path
+                var logoimagePath = Path.Combine(_environment.ContentRootPath, "SettingImages");
+                var subfolderName = "LogoImages";
+                var subfolderPath = Path.Combine(logoimagePath, subfolderName);
+                Directory.CreateDirectory(subfolderPath);
+
+                var logofilePath = Path.Combine(subfolderPath, settingModel.DefaultLogo.FileName);
+                using (var fileStream = new FileStream(logofilePath, FileMode.Create))
+                {
+                    await settingModel.DefaultLogo.CopyToAsync(fileStream);
+                }
+
+                // Update the LogoPath property with the saved image path
+                settingModel.DefaultLogo_FileName = logofileName;
             }
-
-            // Update the LogoPath property with the saved image path
-            settingModel.DefaultLogo_FileName = logofileName;
             #endregion
 
             await unitOfWork.SettingService.UpsertSetting(settingModel);

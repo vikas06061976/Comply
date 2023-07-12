@@ -1,9 +1,11 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
+using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -175,10 +177,18 @@ namespace ComplyExchangeCMS.Persistence.Services
             var sql = "select * from EasyHelpTranslations where EasyHelpId= @EasyHelpId and LanguageId = @LanguageId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QuerySingleOrDefaultAsync<EasyHelpTranslationView>(sql, new { EasyHelpId = easyHelpId, languageId = languageId });
+                var result = await connection.QuerySingleOrDefaultAsync<EasyHelpTranslationView>(sql, new { EasyHelpId = easyHelpId, LanguageId = languageId });
                 return result;
             }
         }
-
+        public async Task<IReadOnlyList<EasyHelpLanguageView>> GetAllLanguage(int easyHelpId)
+        {
+            var sql = "select l.Id,l.Name,et.EasyHelpId from Languages as l left join EasyHelpTranslations as et on l.Id=et.LanguageId AND et.EasyHelpId = @easyHelpId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<EasyHelpLanguageView>(sql, new { easyHelpId = easyHelpId });
+                return result.ToList();
+            }
+        }
     }
 }
