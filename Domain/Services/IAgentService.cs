@@ -1,5 +1,6 @@
 ﻿using ComplyExchangeCMS.Domain.Entities;
 using ComplyExchangeCMS.Domain.Models.Agent;
+using ComplyExchangeCMS.Domain.Models.Master;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<PaginationResponse<AgentView>> GetAllAsync(PaginationRequest request, string searchName);
         Task<AgentView> GetByIdAsync(int id);
         Task<int> DeleteAsync(int id);
-        Task<IReadOnlyList<AgentLanguageView>> GetAllLanguage(int agentId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int agentId);
         Task<int> InsertAgentTranslation(AgentTranslationUpsert agentModel);
         Task<AgentTranslationView> GetAgentTranslation(int agentId, int languageId);
     }

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ComplyExchangeCMS.Domain.Models.Rules
+namespace ComplyExchangeCMS.Domain.Models.Master
 {
-    public class RuleLanguageView
+    public class ModuleLanguageView
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int RulesId { get; set; }
+        public int ModuleId { get; set; }
     }
 }

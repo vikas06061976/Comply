@@ -2,6 +2,7 @@
 using ComplyExchangeCMS.Domain.Models.Documentation;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
 using ComplyExchangeCMS.Domain.Models.FormTypes;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
@@ -207,12 +208,12 @@ namespace ComplyExchangeCMS.Persistence.Services
             }
         }
 
-        public async Task<IReadOnlyList<SelfFormLanguageView>> GetAllLanguage(int selfFormId)
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int selfFormId)
         {
-            var sql = "select l.Id,l.Name,fsct.FormSCId from Languages as l left join FormTypeSelfCertificatesTranslations as fsct on l.Id=fsct.LanguageId AND fsct.FormSCId = @selfFormId";
+            var sql = "select l.Id,l.Name,fsct.FormSCId as ModuleId from Languages as l left join FormTypeSelfCertificatesTranslations as fsct on l.Id=fsct.LanguageId AND fsct.FormSCId = @selfFormId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QueryAsync<SelfFormLanguageView>(sql, new { selfFormId = selfFormId });
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { selfFormId = selfFormId });
                 return result.ToList();
             }
         }
@@ -300,12 +301,12 @@ namespace ComplyExchangeCMS.Persistence.Services
             }
         }
 
-        public async Task<IReadOnlyList<USFormLanguageView>> GetAllUSLanguage(int usFormId)
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllUSLanguage(int usFormId)
         {
-            var sql = "select l.Id,l.Name,fust.FormUSCId from Languages as l left join FormTypeUSCertificatesTranslations as fust on l.Id=fust.LanguageId AND fust.FormUSCId = @usFormId";
+            var sql = "select l.Id,l.Name,fust.FormUSCId as ModuleId from Languages as l left join FormTypeUSCertificatesTranslations as fust on l.Id=fust.LanguageId AND fust.FormUSCId = @usFormId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QueryAsync<USFormLanguageView>(sql, new { usFormId = usFormId });
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { usFormId = usFormId });
                 return result.ToList();
             }
         }

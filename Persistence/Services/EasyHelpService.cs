@@ -1,5 +1,6 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
@@ -181,14 +182,14 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-        public async Task<IReadOnlyList<EasyHelpLanguageView>> GetAllLanguage(int easyHelpId)
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int easyHelpId)
         {
-            var sql = "select l.Id,l.Name,et.EasyHelpId from Languages as l left join EasyHelpTranslations as et on l.Id=et.LanguageId AND et.EasyHelpId = @easyHelpId";
+            var sql = "select l.Id,l.Name,et.EasyHelpId as ModuleId from Languages as l left join EasyHelpTranslations as et on l.Id=et.LanguageId AND et.EasyHelpId = @easyHelpId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QueryAsync<EasyHelpLanguageView>(sql, new { easyHelpId = easyHelpId });
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { easyHelpId = easyHelpId });
                 return result.ToList();
             }
-        }
+        }                                                                                                           
     }
 }

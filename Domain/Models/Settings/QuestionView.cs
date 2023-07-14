@@ -11,6 +11,7 @@ namespace ComplyExchangeCMS.Domain.Models.Settings
         public int Id { get; set; }
         public string Question { get; set; }
         public string QuestionHint { get; set; }
+        public int QuestionHintId { get; set; }
 
     }
 }

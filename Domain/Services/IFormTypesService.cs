@@ -1,4 +1,5 @@
 ﻿using ComplyExchangeCMS.Domain.Models.FormTypes;
+using ComplyExchangeCMS.Domain.Models.Master;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<int> InsertFormTypeUSCTranslation(FormTypesUSCTranslationInsert formTypeUSCModel);
         Task<FormTypeSelfCertiTranslationView> GetFormTypeSCTranslation(int formSCId, int languageId);
         Task<int> InsertFormTypeSelfCertiTranslation(FormTypeSelfCertiTranslationInsert formTypeSCModel);
-        Task<IReadOnlyList<SelfFormLanguageView>> GetAllLanguage(int selfFormId);
-        Task<IReadOnlyList<USFormLanguageView>> GetAllUSLanguage(int usFormId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int selfFormId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllUSLanguage(int usFormId);
     }
 }

@@ -95,7 +95,7 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
-        [HttpPost("InsertQuestionTranslation")]
+        [HttpPost("UpsertQuestionTranslation")]
         public async Task<IActionResult> InsertQuestionTranslation(QuestionTranslationInsert questionModel)
         {
             await unitOfWork.SettingService.InsertQuestionTranslation(questionModel);
@@ -103,10 +103,32 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         }
 
         [HttpGet("GetQuestionTranslation")]
-        public async Task<IActionResult> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId)
+        public async Task<IActionResult> GetQuestionTranslation(int? questionId, int languageId)
         {
-            var data = await unitOfWork.SettingService.GetQuestionTranslation(questionId, questionHintId, languageId);
+            var data = await unitOfWork.SettingService.GetQuestionTranslation(questionId, languageId);
             if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetQuestionHintTranslation")]
+        public async Task<IActionResult> GetQuestionHintTranslation(int? questionHintId, int languageId)
+        {
+            var data = await unitOfWork.SettingService.GetQuestionHintTranslation(questionHintId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int questionId)
+        {
+            var data = await unitOfWork.SettingService.GetAllQuestionLanguage(questionId);
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllHintLanguage")]
+        public async Task<IActionResult> GetAllHintLanguage(int questionHintId)
+        {
+            var data = await unitOfWork.SettingService.GetAllQuestionHintLanguage(questionHintId);
             return Ok(data);
         }
     }

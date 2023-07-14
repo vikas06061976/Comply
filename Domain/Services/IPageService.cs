@@ -1,5 +1,6 @@
 ﻿using ComplyExchangeCMS.Domain.Entities;
 using ComplyExchangeCMS.Domain.Entities.Masters;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace ComplyExchangeCMS.Domain.Services
     {
         Task<int> Insert(PageInsertModel pagesModel);
         Task<int> UpdatePages(PageUpdateModel pagesModel);
-        Task<IReadOnlyList<PageLanguageView>> GetAllLanguage(int pageId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int pageId);
         Task<PageViewModel> GetByIdAsync(int id);
         Task<int> DeleteAsync(int id);
         Task<PageViewModel> GetByNameAsync(string name);

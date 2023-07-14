@@ -14,6 +14,8 @@ using ComplyExchangeCMS.Domain.Models.Settings;
 using ComplyExchangeCMS.Common;
 using ComplyExchangeCMS.Domain.Models.ContentBlock;
 using static ComplyExchangeCMS.Common.Enums;
+using ComplyExchangeCMS.Domain.Models.Rules;
+using ComplyExchangeCMS.Domain.Models.Master;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -111,7 +113,7 @@ namespace ComplyExchangeCMS.Persistence.Services
 
         public async Task<IReadOnlyCollection<QuestionView>> GetQuestions()
         {
-            var sql = "SELECT [Id], [Question], [QuestionHint] FROM Questions";
+            var sql = "SELECT q.Id, q.Question, qh.QuestionHint, qh.Id as QuestionHintId FROM Questions as q left join QuestionHint as qh on q.Id=qh.QuestionId";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<QuestionView>(sql);
@@ -130,27 +132,63 @@ namespace ComplyExchangeCMS.Persistence.Services
                 var parameters = new DynamicParameters();
 
                 parameters.Add("@Content", settingModel.Content, DbType.String);
-                parameters.Add("@QuestionId", settingModel.QuestionId, DbType.Int32);
-                parameters.Add("@QuestionHintId", settingModel.QuestionHintId, DbType.Int32);
                 parameters.Add("@LanguageId", settingModel.LanguageId, DbType.Int32);
                 parameters.Add("@BulkTranslation", settingModel.BulkTranslation, DbType.Boolean);
                 parameters.Add("@CreatedOn", settingModel.CreatedOn, DbType.DateTime);
                 parameters.Add("@ModifiedOn", settingModel.ModifiedOn, DbType.DateTime);
 
-                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationQuestion", parameters, commandType: CommandType.StoredProcedure);
+               
+                if (settingModel.QuestionId != 0)
+                {
+                    parameters.Add("@QuestionId", settingModel.QuestionId, DbType.Int32);
+                    var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationQuestion", parameters, commandType: CommandType.StoredProcedure);
+                    return result;
+                }
+                else
+                {
+                    parameters.Add("@QuestionHintId", settingModel.QuestionHintId, DbType.Int32);
+                    var result = await connection.QueryFirstOrDefaultAsync<int>("InsertTranslationQuestionHint", parameters, commandType: CommandType.StoredProcedure);
+                    return result;
+                }
+            }
+        }
+        public async Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int languageId)
+        {
+            var sql = "SELECT * FROM QuestionsTranslations where QuestionId= @QuestionId and LanguageId=@languageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionId = questionId, languageId = languageId });
                 return result;
             }
         }
-        public async Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId)
+        public async Task<QuestionTranslationView> GetQuestionHintTranslation(int? questionHintId, int languageId)
         {
-            var sql = "SELECT * FROM QuestionsTranslations where (QuestionId= @QuestionId or QuestionHintId = @QuestionHintId) and LanguageId=@languageId";
+            var sql = "SELECT * FROM QuestionHintTranslation where QuestionHintId= @QuestionHintId and LanguageId=@languageId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionId = questionId, QuestionHintId = questionHintId, languageId = languageId });
+                var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionHintId = questionHintId, languageId = languageId });
                 return result;
+            }
+        }
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionLanguage(int questionId)
+        {
+            var sql = "select l.Id,l.Name,qt.QuestionId as ModuleId from Languages as l left join QuestionsTranslations as qt on l.Id=qt.LanguageId AND qt.QuestionId = @QuestionId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { QuestionId = questionId });
+                return result.ToList();
             }
         }
 
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionHintLanguage(int questionHintId)
+        {
+            var sql = "select l.Id,l.Name,qt.QuestionHintId as ModuleId from Languages as l left join QuestionHintTranslation as qt on l.Id=qt.LanguageId AND qt.QuestionHintId = @QuestionHintId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { QuestionHintId = questionHintId });
+                return result.ToList();
+            }
+        }
         #region Validation
         //private static void ValidateResult(SettingInsertModel item)
         //{

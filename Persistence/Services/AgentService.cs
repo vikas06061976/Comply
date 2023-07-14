@@ -1,6 +1,7 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.Agent;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.Extensions.Configuration;
@@ -442,12 +443,12 @@ namespace ComplyExchangeCMS.Persistence.Services
             }
         }
 
-        public async Task<IReadOnlyList<AgentLanguageView>> GetAllLanguage(int agentId)
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int agentId)
         {
-            var sql = "select l.Id,l.Name,agent.AgentId from Languages as l left join AgentTranslations as agent on l.Id=agent.LanguageId AND agent.AgentId = @agentId";
+            var sql = "select l.Id,l.Name,agent.AgentId as ModuleId from Languages as l left join AgentTranslations as agent on l.Id=agent.LanguageId AND agent.AgentId = @agentId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QueryAsync<AgentLanguageView>(sql, new { agentId = agentId });
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { agentId = agentId });
                 return result.ToList();
             }
         }
