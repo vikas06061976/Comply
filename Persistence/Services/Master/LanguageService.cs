@@ -12,6 +12,8 @@ using Dapper;
 using ComplyExchangeCMS.Domain.Models.FormTypes;
 using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
+using ComplyExchangeCMS.Domain.Models.Agent;
+using ComplyExchangeCMS.Domain;
 
 namespace ComplyExchangeCMS.Persistence.Services.Master
 {
@@ -26,7 +28,73 @@ namespace ComplyExchangeCMS.Persistence.Services.Master
         {
             return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
-        public async Task<IReadOnlyList<LanguageView>> GetAllAsync()
+
+        public async Task<PaginationResponse<LanguageView>> GetAllAsync(PaginationRequest request, string searchName)
+        {
+            using (var connection = CreateConnection())
+            {
+                if (connection.State == ConnectionState.Closed)
+                {
+                    connection.Open();
+                }
+
+                IQueryable<LanguageView> lang = connection.Query<LanguageView>
+                    ($@"select * from Languages where IsActive=1 and IsDeleted=0").AsQueryable();
+                // and (name={searchName})
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchName))
+                {
+                    lang = lang.Where(f => f.Name.Contains(searchName));
+                }
+                // Sorting
+                if (!string.IsNullOrEmpty(request.SortColumn))
+                {
+                    switch (request.SortDirection?.ToLower())
+                    {
+                        case "asc":
+                            switch (request.SortColumn.ToLower())
+                            {
+                                case "name":
+                                    lang = lang.OrderBy(f => f.Name);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case "desc":
+                            switch (request.SortColumn.ToLower())
+                            {
+                                case "name":
+                                    lang = lang.OrderByDescending(f => f.Name);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Paging
+                var totalRecords = lang.Count();
+                var totalPages = (int)Math.Ceiling((decimal)totalRecords / request.PageSize);
+                var records = lang.Skip((request.PageNumber - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToList();
+
+                // Return pagination response object
+                return new PaginationResponse<LanguageView>
+                {
+                    TotalRecords = totalRecords,
+                    TotalPages = totalPages,
+                    Records = records
+                };
+            }
+        }
+
+        public async Task<IReadOnlyList<LanguageView>> GetAllLanguage()
         {
             var sql = "select * from Languages where IsActive=1 and IsDeleted=0";
             using (var connection = CreateConnection())

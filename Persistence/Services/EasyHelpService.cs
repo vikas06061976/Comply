@@ -1,14 +1,19 @@
 ﻿using ComplyExchangeCMS.Domain;
+using ComplyExchangeCMS.Domain.Models.ContentBlock;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
 using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,9 +22,11 @@ namespace ComplyExchangeCMS.Persistence.Services
     public class EasyHelpService : IEasyHelpService
     {
         private readonly IConfiguration _configuration;
-        public EasyHelpService(IConfiguration configuration)
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public EasyHelpService(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             _configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
         }
             public IDbConnection CreateConnection()
         {
@@ -190,6 +197,92 @@ namespace ComplyExchangeCMS.Persistence.Services
                 var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { easyHelpId = easyHelpId });
                 return result.ToList();
             }
-        }                                                                                                           
+        }
+
+        public void UploadFile(IFormFile files)
+        {
+            var target = Path.Combine(_hostingEnvironment.ContentRootPath, "UploadedFiles");
+
+            Directory.CreateDirectory(target);
+
+            if (files.Length <= 0) return;
+            var filePath = Path.Combine(target, files.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                files.CopyToAsync(stream);
+            }
+            InsertEasyHelp(filePath);
+        }
+        public void InsertEasyHelp(string filePath)
+        {
+            // Assuming you have the path to the Excel file
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0]; // Assuming data is in the first worksheet
+
+                // Assuming the data starts from the second row (excluding header)
+                int startRow = 2;
+                int endRow = worksheet.Dimension.End.Row;
+
+                // Assuming you have a class representing the data structure
+                List<EasyHelpInsert> data = new List<EasyHelpInsert>();
+
+                for (int row = startRow; row <= endRow; row++)
+                {
+                    EasyHelpInsert rowData = new EasyHelpInsert
+                    {
+                        // Map the columns from the Excel file to your class properties
+                        Easykey = worksheet.Cells[row, 1].Value?.ToString(),
+                        Tooltip= worksheet.Cells[row, 2].Value?.ToString(),
+                        Text = worksheet.Cells[row, 3].Value?.ToString(),
+                        MoreText = worksheet.Cells[row, 4].Value?.ToString(),
+                        // ... map other properties
+                    };
+
+                    data.Add(rowData);
+                }
+
+                using (var connection = CreateConnection())
+                {
+                    foreach (EasyHelpInsert rowData in data)
+                    {
+                        string sql = "INSERT INTO [dbo].[EasyHelp] ([Easykey] ,[Tooltip] ,[Text] ,[MoreText] ,[CreatedOn] ,[IsActive] ,[ModifiedOn]) VALUES (@Easykey ,@Tooltip ,@Text ,@MoreText ,GETUTCDATE() ,1 ,NULL)";
+                        connection.Execute(sql, rowData);
+                    }
+                }
+            }
+        }
+
+        public byte[] GenerateExcelFile()
+        {
+            // SQL query to retrieve data
+            string query = "SELECT Easykey,Tooltip,Text,MoreText FROM EasyHelp";
+
+            using (var connection = CreateConnection())
+            {
+                // Execute the query and retrieve data using Dapper
+                var data = connection.Query(query);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                // Create a new Excel package
+                ExcelPackage package = new ExcelPackage();
+
+                // Add a new worksheet
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+                // Write data to the worksheet
+                worksheet.Cells.LoadFromCollection(data, true);
+
+                // Save the Excel package to a memory stream
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    package.SaveAs(stream);
+                    return stream.ToArray();
+                }
+            }
+        }
+
     }
 }

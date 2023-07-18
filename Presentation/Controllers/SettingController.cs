@@ -95,6 +95,20 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
+        [HttpGet("GetQuestionsById")]
+        public async Task<IActionResult> GetQuestionsById(int questionId)
+        {
+            var data = await unitOfWork.SettingService.GetByQuestionId(questionId);
+            return Ok(data);
+        }
+
+        [HttpPost("UpdateQuestion")]
+        public async Task<IActionResult> UpdateQuestion(QuestionView questionModel)
+        {
+            await unitOfWork.SettingService.UpdateQuestion(questionModel);
+            return Ok("Question updated successfully.");
+        }
+
         [HttpPost("UpsertQuestionTranslation")]
         public async Task<IActionResult> InsertQuestionTranslation(QuestionTranslationInsert questionModel)
         {

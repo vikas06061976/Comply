@@ -5,6 +5,8 @@ using Domain.Services;
 using ComplyExchangeCMS.Domain.Entities;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Models.Master;
+using ComplyExchangeCMS.Domain;
+using System.Threading;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -22,8 +24,25 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         [HttpGet("GetAllLanguage")]
         public async Task<IActionResult> GetAll()
         {
-            var data = await unitOfWork.Languages.GetAllAsync();
+            var data = await unitOfWork.Languages.GetAllLanguage();
             return Ok(data);
+        }
+
+        [HttpGet("LanguageSearch")]
+        public async Task<IActionResult> GetAll(string searchTerm, int pageNumber, int pageSize, string sortColumn,
+        string sortDirection, CancellationToken cancellationToken = default)
+        {
+            var request = new PaginationRequest
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortColumn = sortColumn,
+                SortDirection = sortDirection
+            };
+            var pages = await unitOfWork.Languages.GetAllAsync
+                (request, searchTerm);
+
+            return Ok(pages);
         }
 
         [HttpPost("InsertLanguage")]

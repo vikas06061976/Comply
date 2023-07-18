@@ -18,5 +18,7 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<QuestionTranslationView> GetQuestionHintTranslation(int? questionHintId, int languageId);
         Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionLanguage(int questionId);
         Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionHintLanguage(int questionId);
+        Task<QuestionView> GetByQuestionId(int id);
+        Task<int> UpdateQuestion(QuestionView questionModel);
     }
 }

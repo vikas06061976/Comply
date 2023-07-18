@@ -1,7 +1,11 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
 using Domain.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,10 +16,12 @@ namespace ComplyExchangeCMS.Presentation.Controllers
     public class EasyHelpController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly IHostingEnvironment webHostEnvironment;
 
-        public EasyHelpController(IUnitOfWork unitOfWork)
+        public EasyHelpController(IUnitOfWork unitOfWork, IHostingEnvironment webHostEnvironment)
         {
             this.unitOfWork = unitOfWork;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet("GetAllEasyHelp")]
@@ -87,6 +93,39 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         {
             var data = await unitOfWork.EasyHelpService.GetAllLanguage(easyHelpId);
             return Ok(data);
+        }
+
+        [HttpPost("Import")]
+        public IActionResult CreateEasyHelp(IFormFile formFile)
+        {
+            try
+            {
+                unitOfWork.EasyHelpService.UploadFile(formFile);
+                return Ok("File Uploaded successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("Export")]
+        public IActionResult DownloadExcel()
+        {
+            byte[] excelData = unitOfWork.EasyHelpService.GenerateExcelFile();
+
+            // Set the file name and content type
+            string fileName = "EasyHelp.xlsx";
+            string easyHelpType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            // Save the Excel file to the wwwroot folder
+            string webRootPath = webHostEnvironment.WebRootPath;
+            string filePath = Path.Combine(webRootPath, fileName);
+            System.IO.File.WriteAllBytes(filePath, excelData);
+
+            // Return the file as a response
+            return File(excelData, easyHelpType, fileName);
         }
     }
 }

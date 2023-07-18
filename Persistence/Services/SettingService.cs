@@ -19,7 +19,7 @@ using ComplyExchangeCMS.Domain.Models.Master;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
-    public class SettingService : ISettingService
+    public class SettingService : ISettingService                                                                                                   
     {
         private readonly IConfiguration _configuration;
         public SettingService(IConfiguration configuration)
@@ -120,6 +120,34 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result.ToList();
             }
         }
+
+        public async Task<QuestionView> GetByQuestionId(int id)
+        {
+            var sql = "SELECT q.Id, q.Question, qh.QuestionHint, qh.Id as QuestionHintId FROM Questions as q left join QuestionHint as qh on q.Id=qh.QuestionId where q.Id=@Id";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<QuestionView>(sql, new { Id = id });
+                return result;
+            }
+        }
+
+        public async Task<int> UpdateQuestion(QuestionView questionModel)
+        {
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", questionModel.Id, DbType.Int32);
+                parameters.Add("@Question", questionModel.Question, DbType.String);
+                parameters.Add("@QuestionHint", questionModel.QuestionHint, DbType.String);
+                parameters.Add("@QuestionHintId", questionModel.QuestionHintId, DbType.Int32);
+                
+                var result = await connection.QueryFirstOrDefaultAsync<int>("UpdateQuestion", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
         public async Task<int> InsertQuestionTranslation(QuestionTranslationInsert settingModel)
         {
             settingModel.CreatedOn = DateTime.UtcNow;
@@ -169,7 +197,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 var result = await connection.QuerySingleOrDefaultAsync<QuestionTranslationView>(sql, new { QuestionHintId = questionHintId, languageId = languageId });
                 return result;
             }
-        }
+        }       
         public async Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionLanguage(int questionId)
         {
             var sql = "select l.Id,l.Name,qt.QuestionId as ModuleId from Languages as l left join QuestionsTranslations as qt on l.Id=qt.LanguageId AND qt.QuestionId = @QuestionId";
