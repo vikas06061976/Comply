@@ -83,5 +83,15 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<IEnumerable<AgentSPTQuestionViewModel>> GetAgentSPTQuestionHiddenByAgentIdAsync(int agentId);
         Task UpsertAgentSPTQuestionHiddenAsync(int agentId, List<AgentSPTQuestionInsertModel> existingAgentSPTQuestions);
         #endregion
+
+        #region Agent Written Statement Selection
+        Task<IEnumerable<AgentWrittenStatementSelectionViewModel>> GetAgentWrittenStatementSelectionByAgentIdAsync(int agentId);
+        #endregion
+        #region Agent TINType Selection
+        Task<IEnumerable<AgentTINTypeSelectionViewModel>> GetAgentTINTypeSelectionByAgentIdAsync(int agentId);
+        Task<AgentTINTypeSelectionByIdViewModel> GetAgentTINTypeSelectionByIdAsync(int id);
+        Task<int> UpdateAgentTINTypeSelectionAsync(AgentTINTypeSelectionUpdateModel agentTINTypeSelection);
+
+        #endregion
     }
 }

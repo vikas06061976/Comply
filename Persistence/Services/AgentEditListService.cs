@@ -5,6 +5,7 @@ using ComplyExchangeCMS.Domain.Models.AgentEditList;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -787,5 +788,58 @@ AC.Alias,AC.Hidden FROM SPTQuestions C
             }
         }
         #endregion
+        #region Agent Written Statement Selection
+        public async Task<IEnumerable<AgentWrittenStatementSelectionViewModel>> GetAgentWrittenStatementSelectionByAgentIdAsync(int agentId)
+        {
+            var sql = @"  select ws.contentmanagementid,cm.Name,r.* from WrittenStatementSelections  r
+inner join WrittenStatementReasons ws on ws.id=r.WrittenStatementReasonId
+inner join ContentManagement cm on cm.id=ws.contentmanagementid
+where  r.agentId =@agentId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentWrittenStatementSelectionViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+        #endregion
+
+        public async Task<IEnumerable<AgentTINTypeSelectionViewModel>> GetAgentTINTypeSelectionByAgentIdAsync(int agentId)
+        {
+            var sql = @"select ts.name as TaxpayerIdTypeName,s.Name as [StateName],
+   t.* from TINTypeSelections  t
+inner join TaxpayerIdTypes ts on t.StateId=ts.id
+inner join SelectionStates s on s.id=t.StateId
+where  t.agentId =@agentId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentTINTypeSelectionViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task<AgentTINTypeSelectionByIdViewModel> GetAgentTINTypeSelectionByIdAsync(int id)
+        {
+            var sql = @"select ts.name as TaxpayerIdTypeName,s.Name as [StateName],
+   t.* from TINTypeSelections  t
+inner join TaxpayerIdTypes ts on t.StateId=ts.id
+inner join SelectionStates s on s.id=t.StateId
+where  t.id =@id";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<AgentTINTypeSelectionByIdViewModel>(sql, new { id = id });
+                return result;
+            }
+        }
+
+        public async Task<int> UpdateAgentTINTypeSelectionAsync(AgentTINTypeSelectionUpdateModel agentTINTypeSelection)
+        {
+            agentTINTypeSelection.ModifiedOn = DateTime.UtcNow;
+            var sql = "UPDATE TINTypeSelections SET stateid = @stateid,ModifiedOn=@ModifiedOn WHERE Id = @Id";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.ExecuteAsync(sql, agentTINTypeSelection);
+                return result;
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿                                                             using System.Threading.Tasks; 
+﻿ using System.Threading.Tasks; 
 using Microsoft.AspNetCore.Mvc; 
 using ComplyExchangeCMS.Domain.Entities.Masters;
 using Domain.Services;
@@ -247,6 +247,38 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         {
             await unitOfWork.AgentEditListService.UpsertAgentSPTQuestionHiddenAsync(agentId, existingAgentSPTQuestionIds);
             return Ok("Agent SPTQuestion Hidden List updated successfully.");
+        }
+        #endregion
+        #region  Agent Written Statement Selection
+        [HttpGet("GetAgentWrittenStatementSelectionByAgentId")]
+        public async Task<IActionResult> GetAgentWrittenStatementSelectionByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentWrittenStatementSelectionByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        #endregion
+
+        #region Agent TIN Type Selection
+        [HttpGet("GetAgentTINTypeSelectionByAgentId")]
+        public async Task<IActionResult> GetAgentTINTypeSelectionByAgentId(int agentId)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentTINTypeSelectionByAgentIdAsync(agentId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpGet("GetAgentTINTypeSelectionById")]
+        public async Task<IActionResult> GetAgentTINTypeSelectionById(int id)
+        {
+            var data = await unitOfWork.AgentEditListService.GetAgentTINTypeSelectionByIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpdateAgentTINTypeSelection")]
+        public async Task<IActionResult> UpdateAgentTINTypeSelection(AgentTINTypeSelectionUpdateModel agentTINTypeSelection)
+        {
+            await unitOfWork.AgentEditListService.UpdateAgentTINTypeSelectionAsync(agentTINTypeSelection);
+            return Ok("Agent TINType Selection State updated successfully.");
         }
         #endregion
     }
