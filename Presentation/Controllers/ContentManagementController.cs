@@ -95,7 +95,12 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             var data = await unitOfWork.ContentManagement.UpdateContent(contentBlock);
             return Ok(data);
         }
-
+        [HttpPut("UpdateText")]
+        public async Task<IActionResult> UpdateText( ContentManagementUpdateText contentBlock)
+        {
+            var data = await unitOfWork.ContentManagement.UpdateContentText(contentBlock);
+            return Ok(data);
+        }
         #endregion
 
         [HttpPost("InsertContentManagement")]

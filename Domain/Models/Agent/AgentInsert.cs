@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ namespace ComplyExchangeCMS.Domain.Models.Agent
         public int DefaultLanguageId { get; set; }
         public bool IncludeDefaultEnglish { get; set; }
         public Logo LogoId { get; set; }
+        public IFormFile Logo { get; set; }
+        public string Logo_ImagePath { get; set; }
         public string LogoNavigateURL { get; set; }
         public string PDFWatermark { get; set; }
         public bool DisplayVersion { get; set; }
@@ -112,8 +115,8 @@ namespace ComplyExchangeCMS.Domain.Models.Agent
         public bool SupportingDocumentation8233 { get; set; }
         public bool PenaltiesOfPerjuryCertificationSelfCertEntity { get; set; }
         public bool ElectronicSignatureSelfCertEntity { get; set; }
-        public bool PenaltiesOfPerjuryCertificationSelfCertIndividual { get; set; }         
-        public bool ElectronicSignatureSelfCertIndividual { get; set; }        
+        public bool PenaltiesOfPerjuryCertificationSelfCertIndividual { get; set; }
+        public bool ElectronicSignatureSelfCertIndividual { get; set; }
         public bool W9ExemptFromBUWIndividualSolePs { get; set; }
         public bool ResidencyInformationForm { get; set; }
         public bool AddressLine3Optional { get; set; }

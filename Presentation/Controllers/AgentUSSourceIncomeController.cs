@@ -62,5 +62,21 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok("US Sourced Income Type updated successfully.");
         }
         #endregion
+
+        #region Agent Hidden IncomeCode Onboarding   
+        [HttpGet("GetAgentHiddenIncomeCodeOnboarding")]
+        public async Task<IActionResult> GetAgentHiddenIncomeCodeOnboardingByAgentId(int id)
+        {
+            var data = await unitOfWork.AgentUSSourceIncomeService.GetAgentHiddenIncomeCodeOnboardingByAgentIdAsync(id);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+        [HttpPost("UpsertAgentHiddenIncomeCodeOnboarding")]
+        public async Task<IActionResult> UpsertAgentHiddenIncomeCodeOnboarding(int agentId, List<int> existingAgentIncomeCodeIds)
+        {
+            await unitOfWork.AgentUSSourceIncomeService.UpsertAgentHiddenIncomeCodeOnboardingAsync(agentId, existingAgentIncomeCodeIds);
+            return Ok("Agent IncomeCode Hidden Onboarding List updated successfully.");
+        }
+        #endregion
     }
 }

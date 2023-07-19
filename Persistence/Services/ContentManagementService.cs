@@ -179,6 +179,16 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
+        public async Task<int> UpdateContentText(ContentManagementUpdateText contentBlock)
+        {
+            contentBlock.ModifiedOn = DateTime.UtcNow;
+            var sql = "UPDATE ContentManagement SET Text = @Text,ModifiedOn=@ModifiedOn WHERE Id = @Id";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.ExecuteAsync(sql, contentBlock);
+                return result;
+            }
+        }
         public async Task<IReadOnlyList<ContentManagementView>> GetAllContent()
         {
             var sql = "SELECT Id,Name,Text,CreatedOn,IsActive,IsDeleted,ModifiedOn FROM ContentManagement where TypeId=1";

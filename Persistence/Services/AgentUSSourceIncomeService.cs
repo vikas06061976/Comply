@@ -125,5 +125,54 @@ namespace ComplyExchangeCMS.Persistence.Services
         }
 
         #endregion
+
+        #region  Agent IncomeCode Hidden
+        public async Task<IEnumerable<AgentIncomeCodeViewModel>> GetAgentHiddenIncomeCodeOnboardingByAgentIdAsync(int agentId)
+        {
+            var sql = @"SELECT C.Id as IncomeCodeId, C.Name,AC.AgentId FROM IncomeCodes C 
+                 left JOIN AgentHiddenIncomeCode_Onboarding AC ON C.Id = AC.IncomeCodeId 
+                 and AC.AgentId =@agentId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<AgentIncomeCodeViewModel>(sql, new { agentId = agentId });
+                return result;
+            }
+        }
+
+        public async Task UpsertAgentHiddenIncomeCodeOnboardingAsync(int agentId, List<int> existingAgentIncomeCodeIds)
+        {
+            using (var connection = CreateConnection())
+            {
+                var existingAgentIncomeCodeHiddenOnboarding = await connection.QueryAsync<int>
+                    ("SELECT IncomeCodeId FROM AgentHiddenIncomeCode_Onboarding WHERE AgentId = @AgentId",
+                   new { AgentId = agentId });
+
+                var IncomeCodeToDelete = existingAgentIncomeCodeHiddenOnboarding.Except(existingAgentIncomeCodeIds);
+                var IncomeCodeToAdd = existingAgentIncomeCodeIds.Except(existingAgentIncomeCodeHiddenOnboarding);
+
+                if (IncomeCodeToDelete.Any())
+                {
+                    connection.Execute("delete from AgentHiddenIncomeCode_Onboarding WHERE AgentId = @AgentId AND IncomeCodeId IN @existingAgentIncomeCodeIds",
+                        new { AgentId = agentId, existingAgentIncomeCodeIds = IncomeCodeToDelete });
+                }
+
+                var AgentIncomeCodeHiddenOnboarding = IncomeCodeToAdd.Select
+                    (IncomeCodeId => new AgentHiddenIncomeCodeOnboarding
+                    {
+                        AgentId = agentId,
+                        IncomeCodeId = IncomeCodeId,
+                        CreatedOn = DateTime.Now
+                    });
+
+                if (AgentIncomeCodeHiddenOnboarding.Any())
+                {
+                    connection.Execute("INSERT INTO AgentHiddenIncomeCode_Onboarding(AgentId, IncomeCodeId, CreatedOn) " +
+                        "VALUES (@AgentId, @IncomeCodeId, @CreatedOn)",
+                        AgentIncomeCodeHiddenOnboarding);
+                }
+            }
+        }
+
+        #endregion
     }
 }

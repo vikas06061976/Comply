@@ -15,6 +15,7 @@ namespace ComplyExchangeCMS.Domain.Services
         void InsertContent(string filePath);
         byte[] GenerateExcelFile();
         Task<int> UpdateContent(ContentManagementUpdate contentBlock);
+        Task<int> UpdateContentText(ContentManagementUpdateText contentBlock);
         Task<IReadOnlyList<ContentManagementView>> GetAllContent();
         Task<ContentManagementView> GetContentById(int id);
         (string fileType, byte[] archiveData, string archiveName) DownloadFiles();
