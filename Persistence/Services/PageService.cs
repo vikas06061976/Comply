@@ -290,12 +290,12 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-        public async Task<IReadOnlyList<PageLanguageView>> GetAllLanguage(int pageId)
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int pageId)
         {
-            var sql = "select pt.LanguageId,l.Name,pt.PageId from Languages as l left join PageTranslations as pt on l.Id=pt.LanguageId where pt.PageId=@pageId or pt.PageId is null";
+            var sql = "select l.Id,l.Name,pt.PageId as ModuleId from Languages as l left join PageTranslations as pt on l.Id=pt.LanguageId AND pt.PageId = @pageId";
             using (var connection = CreateConnection())
             {
-                var result = await connection.QueryAsync<PageLanguageView>(sql, new { pageId = pageId });
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { pageId = pageId });
                 return result.ToList();
             }
         }

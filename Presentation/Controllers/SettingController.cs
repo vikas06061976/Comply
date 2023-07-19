@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using static ComplyExchangeCMS.Common.Enums;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {
@@ -46,28 +47,32 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             #endregion
 
             #region DefaultLogo Image
-            if (settingModel.DefaultLogo == null || settingModel.DefaultLogo.Length == 0)
-                return BadRequest("No image selected");
 
-            // Generate a unique filename for the uploaded image
-            var logofileName = Path.GetFileNameWithoutExtension(settingModel.DefaultLogo.FileName);
-            var logofileExtension = Path.GetExtension(settingModel.DefaultLogo.FileName);
-            var logouniqueFileName = $"{logofileName}_{Path.GetRandomFileName()}{logofileExtension}";
+            if (settingModel.DefaultLogoType == Logo.Upload)
+            { 
+                if (settingModel.DefaultLogo == null || settingModel.DefaultLogo.Length == 0)
+                    return BadRequest("Please upload data on default logo.");
 
-            // Save the image to the specified path
-            var logoimagePath = Path.Combine(_environment.ContentRootPath, "SettingImages");
-            var subfolderName = "LogoImages";
-            var subfolderPath = Path.Combine(logoimagePath, subfolderName);
-            Directory.CreateDirectory(subfolderPath);
+                // Generate a unique filename for the uploaded image
+                var logofileName = Path.GetFileNameWithoutExtension(settingModel.DefaultLogo.FileName);
+                var logofileExtension = Path.GetExtension(settingModel.DefaultLogo.FileName);
+                var logouniqueFileName = $"{logofileName}_{Path.GetRandomFileName()}{logofileExtension}";
 
-            var logofilePath = Path.Combine(subfolderPath, settingModel.DefaultLogo.FileName);
-            using (var fileStream = new FileStream(logofilePath, FileMode.Create))
-            {
-                await settingModel.DefaultLogo.CopyToAsync(fileStream);
+                // Save the image to the specified path
+                var logoimagePath = Path.Combine(_environment.ContentRootPath, "SettingImages");
+                var subfolderName = "LogoImages";
+                var subfolderPath = Path.Combine(logoimagePath, subfolderName);
+                Directory.CreateDirectory(subfolderPath);
+
+                var logofilePath = Path.Combine(subfolderPath, settingModel.DefaultLogo.FileName);
+                using (var fileStream = new FileStream(logofilePath, FileMode.Create))
+                {
+                    await settingModel.DefaultLogo.CopyToAsync(fileStream);
+                }
+
+                // Update the LogoPath property with the saved image path
+                settingModel.DefaultLogo_FileName = logofileName;
             }
-
-            // Update the LogoPath property with the saved image path
-            settingModel.DefaultLogo_FileName = logofileName;
             #endregion
 
             await unitOfWork.SettingService.UpsertSetting(settingModel);
@@ -90,7 +95,21 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok(data);
         }
 
-        [HttpPost("InsertQuestionTranslation")]
+        [HttpGet("GetQuestionsById")]
+        public async Task<IActionResult> GetQuestionsById(int questionId)
+        {
+            var data = await unitOfWork.SettingService.GetByQuestionId(questionId);
+            return Ok(data);
+        }
+
+        [HttpPost("UpdateQuestion")]
+        public async Task<IActionResult> UpdateQuestion(QuestionView questionModel)
+        {
+            await unitOfWork.SettingService.UpdateQuestion(questionModel);
+            return Ok("Question updated successfully.");
+        }
+
+        [HttpPost("UpsertQuestionTranslation")]
         public async Task<IActionResult> InsertQuestionTranslation(QuestionTranslationInsert questionModel)
         {
             await unitOfWork.SettingService.InsertQuestionTranslation(questionModel);
@@ -98,10 +117,32 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         }
 
         [HttpGet("GetQuestionTranslation")]
-        public async Task<IActionResult> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId)
+        public async Task<IActionResult> GetQuestionTranslation(int? questionId, int languageId)
         {
-            var data = await unitOfWork.SettingService.GetQuestionTranslation(questionId, questionHintId, languageId);
+            var data = await unitOfWork.SettingService.GetQuestionTranslation(questionId, languageId);
             if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetQuestionHintTranslation")]
+        public async Task<IActionResult> GetQuestionHintTranslation(int? questionHintId, int languageId)
+        {
+            var data = await unitOfWork.SettingService.GetQuestionHintTranslation(questionHintId, languageId);
+            if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int questionId)
+        {
+            var data = await unitOfWork.SettingService.GetAllQuestionLanguage(questionId);
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllHintLanguage")]
+        public async Task<IActionResult> GetAllHintLanguage(int questionHintId)
+        {
+            var data = await unitOfWork.SettingService.GetAllQuestionHintLanguage(questionHintId);
             return Ok(data);
         }
     }

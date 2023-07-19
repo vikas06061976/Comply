@@ -10,7 +10,8 @@ namespace ComplyExchangeCMS.Domain.Services.Master
 {
     public interface ILanguageService
     {
-        Task<IReadOnlyList<LanguageView>> GetAllAsync();
+        Task<PaginationResponse<LanguageView>> GetAllAsync(PaginationRequest request, string searchName);
+        Task<IReadOnlyList<LanguageView>> GetAllLanguage();
         Task<int> InsertLanguage(LanguageInsert languageModel);
         Task<int> UpdateLanguage(LanguageUpdate languageModel);
         Task<int> DeleteLanguage(int Id);

@@ -1,4 +1,5 @@
-﻿using ComplyExchangeCMS.Domain.Models.Settings;
+﻿using ComplyExchangeCMS.Domain.Models.Master;
+using ComplyExchangeCMS.Domain.Models.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<SettingViewModel> GetSetting();
         Task<IReadOnlyCollection<QuestionView>> GetQuestions();
         Task<int> InsertQuestionTranslation(QuestionTranslationInsert settingModel);
-        Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int? questionHintId, int languageId);
+        Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int languageId);
+        Task<QuestionTranslationView> GetQuestionHintTranslation(int? questionHintId, int languageId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionLanguage(int questionId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllQuestionHintLanguage(int questionId);
+        Task<QuestionView> GetByQuestionId(int id);
+        Task<int> UpdateQuestion(QuestionView questionModel);
     }
 }

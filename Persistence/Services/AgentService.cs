@@ -1,9 +1,12 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.Agent;
+using ComplyExchangeCMS.Domain.Models.EasyHelp;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -400,6 +403,53 @@ namespace ComplyExchangeCMS.Persistence.Services
             {
                 var result = await connection.ExecuteAsync(sql, new { Id = id });
                 return result;
+            }
+        }
+        public async Task<int> InsertAgentTranslation(AgentTranslationUpsert agentModel)
+        {
+            agentModel.CreatedOn = DateTime.UtcNow;
+            agentModel.ModifiedOn = DateTime.UtcNow;
+            using (var connection = CreateConnection())
+            {
+                connection.Open();
+
+                // Create the parameters for the stored procedure
+                var parameters = new DynamicParameters();
+                parameters.Add("@AgentId", agentModel.AgentId, DbType.Int32);
+                parameters.Add("@LanguageId", agentModel.LanguageId, DbType.Int32);
+                parameters.Add("@Description", agentModel.Description, DbType.String);
+                parameters.Add("@TermsCondition", agentModel.TermsCondition, DbType.String);
+                parameters.Add("@TokenEmail", agentModel.TokenEmail, DbType.String);
+                parameters.Add("@SendForSignatoryEmail", agentModel.SendForSignatoryEmail, DbType.String);
+                parameters.Add("@SendForSignatoryEmailContinuationLink", agentModel.SendForSignatoryEmailContinuationLink, DbType.String);
+                parameters.Add("@SaveAndExitEmail", agentModel.SaveAndExitEmail, DbType.String);
+                parameters.Add("@NextAgentIntroductionText", agentModel.NextAgentIntroductionText, DbType.String);
+                parameters.Add("@WelcomePopup", agentModel.WelcomePopup, DbType.String);
+                parameters.Add("@BulkTranslation", agentModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", agentModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", agentModel.ModifiedOn, DbType.DateTime);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertAgentTranslation", parameters, commandType: CommandType.StoredProcedure);
+                return result;
+            }
+        }
+        public async Task<AgentTranslationView> GetAgentTranslation(int agentId, int languageId)
+        {
+            var sql = "select * from AgentTranslations where AgentId= @AgentId and LanguageId = @LanguageId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QuerySingleOrDefaultAsync<AgentTranslationView>(sql, new { AgentId = agentId, LanguageId = languageId });
+                return result;
+            }
+        }
+
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int agentId)
+        {
+            var sql = "select l.Id,l.Name,agent.AgentId as ModuleId from Languages as l left join AgentTranslations as agent on l.Id=agent.LanguageId AND agent.AgentId = @agentId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { agentId = agentId });
+                return result.ToList();
             }
         }
     }

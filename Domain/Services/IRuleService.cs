@@ -1,4 +1,5 @@
-﻿using ComplyExchangeCMS.Domain.Models.Rules;
+﻿using ComplyExchangeCMS.Domain.Models.Master;
+using ComplyExchangeCMS.Domain.Models.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<int> DeleteRules(int id); 
         Task<int> InsertRulesTranslation(RuleTranslationInsert ruleModel);
         Task<RuleTranslationView> GetRuleTranslation(int ruleId, int languageId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int ruleId);
     }
 }
 

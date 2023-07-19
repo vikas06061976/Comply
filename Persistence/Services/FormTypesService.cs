@@ -1,6 +1,8 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.Documentation;
+using ComplyExchangeCMS.Domain.Models.EasyHelp;
 using ComplyExchangeCMS.Domain.Models.FormTypes;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Pages;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
@@ -206,6 +208,16 @@ namespace ComplyExchangeCMS.Persistence.Services
             }
         }
 
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int selfFormId)
+        {
+            var sql = "select l.Id,l.Name,fsct.FormSCId as ModuleId from Languages as l left join FormTypeSelfCertificatesTranslations as fsct on l.Id=fsct.LanguageId AND fsct.FormSCId = @selfFormId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { selfFormId = selfFormId });
+                return result.ToList();
+            }
+        }
+
         #region Form types (United States Certificates)
 
         public async Task<int> UpdateUSCertificate(FormTypesUSCertiUpdate formTypesUSCerti)
@@ -286,6 +298,16 @@ namespace ComplyExchangeCMS.Persistence.Services
             {
                 var result = await connection.QuerySingleOrDefaultAsync<FormTypesUSCTranslationView>(sql, new { FormUSCId = formUSCId, languageId = languageId });
                 return result;
+            }
+        }
+
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllUSLanguage(int usFormId)
+        {
+            var sql = "select l.Id,l.Name,fust.FormUSCId as ModuleId from Languages as l left join FormTypeUSCertificatesTranslations as fust on l.Id=fust.LanguageId AND fust.FormUSCId = @usFormId";
+            using (var connection = CreateConnection())
+            {
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { usFormId = usFormId });
+                return result.ToList();
             }
         }
 

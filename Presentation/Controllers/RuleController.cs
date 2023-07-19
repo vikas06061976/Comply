@@ -80,5 +80,12 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             if (data == null) return Ok();
             return Ok(data);
         }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int ruleId)
+        {
+            var data = await unitOfWork.RuleService.GetAllLanguage(ruleId);
+            return Ok(data);
+        }
     }
 }

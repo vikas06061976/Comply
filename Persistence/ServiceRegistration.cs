@@ -27,9 +27,9 @@ namespace ComplyExchangeCMS.Persistence
             services.AddScoped<IRuleService, RuleService>();
             services.AddScoped<IEasyHelpService, EasyHelpService>();
             services.AddScoped<ISettingService,SettingService>();
-
             services.AddScoped<IAgentFormTypeService, AgentFormTypeService>();
             services.AddScoped<IAgentUSSourceIncomeService, AgentUSSourceIncomeService>();
+            services.AddScoped<ISettingKeyService, SettingKeyService>();
         }
     }
 }
