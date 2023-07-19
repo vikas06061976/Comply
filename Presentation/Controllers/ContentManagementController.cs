@@ -1,5 +1,5 @@
 ﻿using ComplyExchangeCMS.Domain.Models.ContentBlock;
-using ComplyExchangeCMS.Domain.Models.Pages;
+using ComplyExchangeCMS.Domain.Models.ContentManagement;
 using Domain.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +22,6 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             this.webHostEnvironment = webHostEnvironment;
         }
 
-        #region Content Block
         [HttpPost("Import")]
         public IActionResult CreateContent(IFormFile formFile)
         {
@@ -90,45 +89,31 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         //}
 
         [HttpPut("Update")]
-        public async Task<IActionResult> Update([FromForm] ContentManagementUpdate contentBlock)
+        public async Task<IActionResult> Update(ContentManagementUpdate contentBlock)
         {
             var data = await unitOfWork.ContentManagement.UpdateContent(contentBlock);
             return Ok(data);
         }
-        [HttpPut("UpdateText")]
-        public async Task<IActionResult> UpdateText( ContentManagementUpdateText contentBlock)
-        {
-            var data = await unitOfWork.ContentManagement.UpdateContentText(contentBlock);
-            return Ok(data);
-        }
-        #endregion
 
-        [HttpPost("InsertContentManagement")]
-        public async Task<IActionResult> CreateContentManagement(ContentManagementInsert contentManagementModel)
+        [HttpPost("InsertContentTranslation")]
+        public async Task<IActionResult> InsertContentTranslation(ContentManagementLanguageInsert contentModel)
         {
-            await unitOfWork.ContentManagement.InsertContentManagement(contentManagementModel);
-            return Ok("Data created successfully.");
+            await unitOfWork.ContentManagement.InsertContentTranslation(contentModel);
+            return Ok("Content translation updated successfully.");
         }
 
-        [HttpPost("UpdateContentManagement")]
-        public async Task<IActionResult> UpdateContentManagement(ContentManagementUpdate contentManagementModel)
+        [HttpGet("GetContentTranslation")]
+        public async Task<IActionResult> GetContentTranslation(int contentId, int languageId)
         {
-            await unitOfWork.ContentManagement.UpdateContentManagement(contentManagementModel);
-            return Ok("Data updated successfully.");
-        }
-
-        [HttpGet("GetAllContentManagement")]
-        public async Task<IActionResult> GetAllEasyHelp(int TypeId)
-        {
-            var data = await unitOfWork.ContentManagement.GetAllContentManagement(TypeId);
-            return Ok(data);
-        }
-
-        [HttpGet("GetEasyHelpById")]
-        public async Task<IActionResult> GeEasyHelptById(int TypeId, int Id)
-        {
-            var data = await unitOfWork.ContentManagement.GetContentManagementById(TypeId, Id);
+            var data = await unitOfWork.ContentManagement.GetContentTranslation(contentId, languageId);
             if (data == null) return Ok();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAllLanguage")]
+        public async Task<IActionResult> GetAllLanguage(int contentId)
+        {
+            var data = await unitOfWork.ContentManagement.GetAllLanguage(contentId);
             return Ok(data);
         }
     }

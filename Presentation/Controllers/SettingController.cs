@@ -117,7 +117,7 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         }
 
         [HttpGet("GetQuestionTranslation")]
-        public async Task<IActionResult> GetQuestionTranslation(int? questionId, int languageId)
+        public async Task<IActionResult> GetQuestionTranslation(int questionId, int languageId)
         {
             var data = await unitOfWork.SettingService.GetQuestionTranslation(questionId, languageId);
             if (data == null) return Ok();
@@ -125,7 +125,7 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         }
 
         [HttpGet("GetQuestionHintTranslation")]
-        public async Task<IActionResult> GetQuestionHintTranslation(int? questionHintId, int languageId)
+        public async Task<IActionResult> GetQuestionHintTranslation(int questionHintId, int languageId)
         {
             var data = await unitOfWork.SettingService.GetQuestionHintTranslation(questionHintId, languageId);
             if (data == null) return Ok();

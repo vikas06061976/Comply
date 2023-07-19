@@ -1,12 +1,9 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using ComplyExchangeCMS.Domain.Entities.Masters;
-using Domain.Services;
-using ComplyExchangeCMS.Domain.Entities;
-using ComplyExchangeCMS.Domain.Models.Documentation;
-using ComplyExchangeCMS.Domain;
-using System.Threading;
+﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.Rules;
+using Domain.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ComplyExchangeCMS.Presentation.Controllers
 {

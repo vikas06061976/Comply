@@ -180,7 +180,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 }
             }
         }
-        public async Task<QuestionTranslationView> GetQuestionTranslation(int? questionId, int languageId)
+        public async Task<QuestionTranslationView> GetQuestionTranslation(int questionId, int languageId)
         {
             var sql = "SELECT * FROM QuestionsTranslations where QuestionId= @QuestionId and LanguageId=@languageId";
             using (var connection = CreateConnection())
@@ -189,7 +189,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result;
             }
         }
-        public async Task<QuestionTranslationView> GetQuestionHintTranslation(int? questionHintId, int languageId)
+        public async Task<QuestionTranslationView> GetQuestionHintTranslation(int questionHintId, int languageId)
         {
             var sql = "SELECT * FROM QuestionHintTranslation where QuestionHintId= @QuestionHintId and LanguageId=@languageId";
             using (var connection = CreateConnection())

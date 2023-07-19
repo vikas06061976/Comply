@@ -115,8 +115,8 @@ namespace ComplyExchangeCMS.Domain.Models.Agent
         public bool SupportingDocumentation8233 { get; set; }
         public bool PenaltiesOfPerjuryCertificationSelfCertEntity { get; set; }
         public bool ElectronicSignatureSelfCertEntity { get; set; }
-        public bool PenaltiesOfPerjuryCertificationSelfCertIndividual { get; set; }
-        public bool ElectronicSignatureSelfCertIndividual { get; set; }
+        public bool PenaltiesOfPerjuryCertificationSelfCertIndividual { get; set; }         
+        public bool ElectronicSignatureSelfCertIndividual { get; set; }        
         public bool W9ExemptFromBUWIndividualSolePs { get; set; }
         public bool ResidencyInformationForm { get; set; }
         public bool AddressLine3Optional { get; set; }

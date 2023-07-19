@@ -1,5 +1,7 @@
 ﻿using ComplyExchangeCMS.Domain.Entities;
 using ComplyExchangeCMS.Domain.Models.ContentBlock;
+using ComplyExchangeCMS.Domain.Models.ContentManagement;
+using ComplyExchangeCMS.Domain.Models.Master;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -15,17 +17,12 @@ namespace ComplyExchangeCMS.Domain.Services
         void InsertContent(string filePath);
         byte[] GenerateExcelFile();
         Task<int> UpdateContent(ContentManagementUpdate contentBlock);
-        Task<int> UpdateContentText(ContentManagementUpdateText contentBlock);
         Task<IReadOnlyList<ContentManagementView>> GetAllContent();
         Task<ContentManagementView> GetContentById(int id);
         (string fileType, byte[] archiveData, string archiveName) DownloadFiles();
+        Task<ContentManagementLanguageView> GetContentTranslation(int contentId, int languageId);
+        Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int contentId);
+        Task<int> InsertContentTranslation(ContentManagementLanguageInsert contentModel);
 
-        #region Easy Help
-        Task<int> InsertContentManagement(ContentManagementInsert contentMgntModel);
-        Task<int> UpdateContentManagement(ContentManagementUpdate contentMgntModel);
-        Task<IReadOnlyList<ContentManagementView>> GetAllContentManagement(int TypeId);
-        Task<ContentManagementView> GetContentManagementById(int TypeId, int Id);
-
-        #endregion
     }
 }

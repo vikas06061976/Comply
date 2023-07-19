@@ -249,37 +249,5 @@ namespace ComplyExchangeCMS.Presentation.Controllers
             return Ok("Agent SPTQuestion Hidden List updated successfully.");
         }
         #endregion
-        #region  Agent Written Statement Selection
-        [HttpGet("GetAgentWrittenStatementSelectionByAgentId")]
-        public async Task<IActionResult> GetAgentWrittenStatementSelectionByAgentId(int id)
-        {
-            var data = await unitOfWork.AgentEditListService.GetAgentWrittenStatementSelectionByAgentIdAsync(id);
-            if (data == null) return Ok();
-            return Ok(data);
-        }
-        #endregion
-
-        #region Agent TIN Type Selection
-        [HttpGet("GetAgentTINTypeSelectionByAgentId")]
-        public async Task<IActionResult> GetAgentTINTypeSelectionByAgentId(int agentId)
-        {
-            var data = await unitOfWork.AgentEditListService.GetAgentTINTypeSelectionByAgentIdAsync(agentId);
-            if (data == null) return Ok();
-            return Ok(data);
-        }
-        [HttpGet("GetAgentTINTypeSelectionById")]
-        public async Task<IActionResult> GetAgentTINTypeSelectionById(int id)
-        {
-            var data = await unitOfWork.AgentEditListService.GetAgentTINTypeSelectionByIdAsync(id);
-            if (data == null) return Ok();
-            return Ok(data);
-        }
-        [HttpPost("UpdateAgentTINTypeSelection")]
-        public async Task<IActionResult> UpdateAgentTINTypeSelection(AgentTINTypeSelectionUpdateModel agentTINTypeSelection)
-        {
-            await unitOfWork.AgentEditListService.UpdateAgentTINTypeSelectionAsync(agentTINTypeSelection);
-            return Ok("Agent TINType Selection State updated successfully.");
-        }
-        #endregion
     }
 }

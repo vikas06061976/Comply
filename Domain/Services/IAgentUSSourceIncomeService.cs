@@ -1,5 +1,4 @@
 ﻿using ComplyExchangeCMS.Domain.Models.Agent;
-using ComplyExchangeCMS.Domain.Models.AgentEditList;
 using ComplyExchangeCMS.Domain.Models.AgentUSSourceIncome;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,11 +19,6 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<IEnumerable<USSourcedIncomeTypeSelectionViewModel>> GetAgentUSSourcedIncomeTypeSelectionAsync(int AgentId);
         Task<USSourcedIncomeTypeSelectionViewModel> GetAgentUSSourcedIncomeTypeSelectionByIdAsync
             (int agentid, int uSSourcedIncomeTypeId);
-        #endregion
-
-        #region Agent IncomeCode Hidden OnBoarding
-        Task<IEnumerable<AgentIncomeCodeViewModel>> GetAgentHiddenIncomeCodeOnboardingByAgentIdAsync(int agentId);
-        Task UpsertAgentHiddenIncomeCodeOnboardingAsync(int agentId, List<int> existingAgentIncomeCodes);
         #endregion
     }
 }

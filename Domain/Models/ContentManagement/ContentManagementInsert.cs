@@ -11,7 +11,7 @@ namespace ComplyExchangeCMS.Domain.Models.ContentBlock
         public string Language { get; set; }
         public string Translation { get; set; }
         public string ToolTip { get; set; }
-        public ContentManagement TypeId { get; set; }
+        //public ContentManagement TypeId { get; set; }
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
     }
 }

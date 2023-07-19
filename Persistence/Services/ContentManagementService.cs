@@ -1,6 +1,6 @@
-﻿using ComplyExchangeCMS.Common;
-using ComplyExchangeCMS.Domain.Models.ContentBlock;
-using ComplyExchangeCMS.Domain.Models.FormTypes;
+﻿using ComplyExchangeCMS.Domain.Models.ContentBlock;
+using ComplyExchangeCMS.Domain.Models.ContentManagement;
+using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Services;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +15,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using static ComplyExchangeCMS.Common.Enums;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
@@ -82,7 +81,7 @@ namespace ComplyExchangeCMS.Persistence.Services
                 {
                     foreach (ContentManagementInsert rowData in data)
                     {
-                        string sql = "INSERT INTO [dbo].[ContentManagement] ([Name] ,[Text] ,[CreatedOn] ,[IsActive] ,[IsDeleted] ,[ModifiedOn],[TypeId]) VALUES (@Name, @Text ,GETUTCDATE() ,1 ,0 ,NULL,1)";
+                        string sql = "INSERT INTO [dbo].[ContentManagement] ([Name] ,[Text] ,[CreatedOn] ,[IsActive] ,[IsDeleted] ,[ModifiedOn]) VALUES (@Name, @Text ,GETUTCDATE() ,1 ,0 ,NULL)";
                         connection.Execute(sql, rowData);
                     }
                 }
@@ -172,17 +171,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         public async Task<int> UpdateContent(ContentManagementUpdate contentBlock)
         {
             contentBlock.ModifiedOn = DateTime.UtcNow;
-            var sql = "UPDATE ContentManagement SET Name = @Name ,Text = @Text ,IsActive = @IsActive ,IsDeleted = @IsDeleted ,ModifiedOn=@ModifiedOn WHERE Id = @Id and TypeId=1";
-            using (var connection = CreateConnection())
-            {
-                var result = await connection.ExecuteAsync(sql, contentBlock);
-                return result;
-            }
-        }
-        public async Task<int> UpdateContentText(ContentManagementUpdateText contentBlock)
-        {
-            contentBlock.ModifiedOn = DateTime.UtcNow;
-            var sql = "UPDATE ContentManagement SET Text = @Text,ModifiedOn=@ModifiedOn WHERE Id = @Id";
+            var sql = "UPDATE ContentManagement SET Name = @Name ,Text = @Text ,ModifiedOn=@ModifiedOn WHERE Id = @Id";
             using (var connection = CreateConnection())
             {
                 var result = await connection.ExecuteAsync(sql, contentBlock);
@@ -191,7 +180,7 @@ namespace ComplyExchangeCMS.Persistence.Services
         }
         public async Task<IReadOnlyList<ContentManagementView>> GetAllContent()
         {
-            var sql = "SELECT Id,Name,Text,CreatedOn,IsActive,IsDeleted,ModifiedOn FROM ContentManagement where TypeId=1";
+            var sql = "SELECT Id,Name,Text,CreatedOn,ModifiedOn FROM ContentManagement";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QueryAsync<ContentManagementView>(sql);
@@ -200,149 +189,56 @@ namespace ComplyExchangeCMS.Persistence.Services
         }
         public async Task<ContentManagementView> GetContentById(int id)
         {
-            var sql = "SELECT Id,Name,Text,CreatedOn,IsActive,IsDeleted,ModifiedOn FROM ContentManagement where TypeId=1 and Id = @Id";
+            var sql = "SELECT Id,Name,Text,CreatedOn,ModifiedOn FROM ContentManagement where Id = @Id";
             using (var connection = CreateConnection())
             {
                 var result = await connection.QuerySingleOrDefaultAsync<ContentManagementView>(sql, new { Id = id });
                 return result;
             }
         }
-        #endregion
-
-        #region Easy Help and Phrases
-        public async Task<int> InsertContentManagement(ContentManagementInsert contentMgntModel)
+        public async Task<int> InsertContentTranslation(ContentManagementLanguageInsert contentModel)
         {
-            contentMgntModel.CreatedOn = DateTime.UtcNow;
+            contentModel.CreatedOn = DateTime.UtcNow;
+            contentModel.ModifiedOn = DateTime.UtcNow;
             using (var connection = CreateConnection())
             {
                 connection.Open();
-                ValidateContentManagementResult(contentMgntModel);
+
                 // Create the parameters for the stored procedure
                 var parameters = new DynamicParameters();
-                parameters.Add("@Name", contentMgntModel.Name, DbType.String);
-                parameters.Add("@ToolTip", contentMgntModel.ToolTip, DbType.String);
-                parameters.Add("@Text", contentMgntModel.Text, DbType.String);
-                parameters.Add("@MoreText", contentMgntModel.MoreText, DbType.String);
-                parameters.Add("@Translation", contentMgntModel.Translation, DbType.String);
-                parameters.Add("@Language", contentMgntModel.Language, DbType.String);
-                parameters.Add("@CreatedOn", contentMgntModel.CreatedOn, DbType.DateTime);
-                parameters.Add("@TypeId", contentMgntModel.TypeId, DbType.Int32);
+                parameters.Add("@ContentId", contentModel.ContentBlockId, DbType.Int32);
+                parameters.Add("@LanguageId", contentModel.LanguageId, DbType.Int32);
+                parameters.Add("@Content", contentModel.Content, DbType.String);
+                parameters.Add("@BulkTranslation", contentModel.BulkTranslation, DbType.Boolean);
+                parameters.Add("@CreatedOn", contentModel.CreatedOn, DbType.DateTime);
+                parameters.Add("@ModifiedOn", contentModel.ModifiedOn, DbType.DateTime);
 
-                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertContentManagement", parameters, commandType: CommandType.StoredProcedure);
+                var result = await connection.QueryFirstOrDefaultAsync<int>("InsertContentTranslation", parameters, commandType: CommandType.StoredProcedure);
                 return result;
             }
         }
-        public async Task<int> UpdateContentManagement(ContentManagementUpdate contentMgntModel)
+
+        public async Task<ContentManagementLanguageView> GetContentTranslation(int contentId, int languageId)
         {
-            contentMgntModel.ModifiedOn = DateTime.UtcNow;
+            var sql = "SELECT * FROM ContentManagementTranslations where ContentId= @ContentId and LanguageId=@languageId";
             using (var connection = CreateConnection())
             {
-                connection.Open();
-                ValidateContentManagementResult(contentMgntModel);
-                // Create the parameters for the stored procedure
-                var parameters = new DynamicParameters();
-                parameters.Add("@Id", contentMgntModel.Id, DbType.Int32);
-                parameters.Add("@Name", contentMgntModel.Name, DbType.String);
-                parameters.Add("@ToolTip", contentMgntModel.ToolTip, DbType.String);
-                parameters.Add("@Text", contentMgntModel.Text, DbType.String);
-                parameters.Add("@MoreText", contentMgntModel.MoreText, DbType.String);
-                parameters.Add("@Translation", contentMgntModel.Translation, DbType.String);
-                parameters.Add("@Language", contentMgntModel.Language, DbType.String);
-                parameters.Add("@IsActive", contentMgntModel.IsActive, DbType.Boolean);
-                parameters.Add("@IsDeleted", contentMgntModel.IsDeleted, DbType.Boolean);
-                parameters.Add("@ModifiedOn", contentMgntModel.ModifiedOn, DbType.DateTime);
-                parameters.Add("@TypeId", contentMgntModel.TypeId, DbType.Int32);
-
-                var result = await connection.QueryFirstOrDefaultAsync<int>("UpdateContentManagement", parameters, commandType: CommandType.StoredProcedure);
+                var result = await connection.QuerySingleOrDefaultAsync<ContentManagementLanguageView>(sql, new { ContentId = contentId, languageId = languageId });
                 return result;
             }
         }
-        public async Task<IReadOnlyList<ContentManagementView>> GetAllContentManagement(int TypeId)
+
+        public async Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int contentId)
         {
+            var sql = "select l.Id,l.Name,cmt.ContentId as ModuleId from Languages as l left join ContentManagementTranslations as cmt on l.Id=cmt.LanguageId AND cmt.ContentId = @ContentId";
             using (var connection = CreateConnection())
             {
-                var parameters = new DynamicParameters();
-                parameters.Add("@TypeId", TypeId, DbType.Int32);
-                var result = await connection.QueryAsync<ContentManagementView>("GetAllContentManagement", parameters, commandType: CommandType.StoredProcedure);
+                var result = await connection.QueryAsync<ModuleLanguageView>(sql, new { ContentId = contentId });
                 return result.ToList();
             }
         }
-        public async Task<ContentManagementView> GetContentManagementById(int TypeId,int Id)
-        {
-            using (var connection = CreateConnection())
-            {
-                var parameters = new DynamicParameters();
-                parameters.Add("@TypeId", TypeId, DbType.Int32);
-                parameters.Add("@Id", Id, DbType.Int32);
-                var result = await connection.QuerySingleOrDefaultAsync<ContentManagementView>("GetAllContentManagementById", parameters, commandType: CommandType.StoredProcedure);
-                return result;
-            }
-        }
 
         #endregion
-
-        #region Phrases
-        public async Task<IReadOnlyList<ContentManagementView>> GetAllPhrases()
-        {
-            var sql = "SELECT Id,Name,Language,Translation,CreatedOn,IsActive,IsDeleted,ModifiedOn,Typeid FROM ContentManagement where TypeId=3";
-            using (var connection = CreateConnection())
-            {
-                var result = await connection.QueryAsync<ContentManagementView>(sql);
-                return result.ToList();
-            }
-        }
-        public async Task<ContentManagementView> GetPhrasesById(int id)
-        {
-            var sql = "SELECT Id,Name,Language,Translation,CreatedOn,IsActive,IsDeleted,ModifiedOn,Typeid FROM ContentManagement where TypeId=3 and Id = @Id";
-            using (var connection = CreateConnection())
-            {
-                var result = await connection.QuerySingleOrDefaultAsync<ContentManagementView>(sql, new { Id = id });
-                return result;
-            }
-        }
-
-        #endregion
-
-        #region Validate_Methods
-        private static void ValidateContentManagementResult(ContentManagementInsert item)
-        {
-            if (!EnumHelperMethods.EnumContainValue<ContentManagement>(item.TypeId))
-            {
-                throw new Exception("Type is invalid.");
-            }
-            if (item.TypeId == ContentManagement.Phrases)
-            {
-                if (string.IsNullOrEmpty(item.Translation))
-                {
-                    throw new Exception("Translation can't be blank");
-                }
-                if (string.IsNullOrEmpty(item.Language))
-                {
-                    throw new Exception("Language can't be blank");
-                }
-            }
-        }
-
-        private static void ValidateContentManagementResult(ContentManagementUpdate item)
-        {
-            if (!EnumHelperMethods.EnumContainValue<ContentManagement>(item.TypeId))
-            {
-                throw new Exception("Type is invalid.");
-            }
-            if (item.TypeId == ContentManagement.Phrases)
-            {
-                if (string.IsNullOrEmpty(item.Translation))
-                {
-                    throw new Exception("Translation can't be blank");
-                }
-                if (string.IsNullOrEmpty(item.Language))
-                {
-                    throw new Exception("Language can't be blank");
-                }
-            }
-        }
-        #endregion
-
 
     }
 }
