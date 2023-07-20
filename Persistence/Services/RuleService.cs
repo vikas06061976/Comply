@@ -13,17 +13,23 @@ using ComplyExchangeCMS.Domain.Models.Rules;
 using ComplyExchangeCMS.Domain.Services;
 using ComplyExchangeCMS.Domain.Models.EasyHelp;
 using ComplyExchangeCMS.Domain.Models.Master;
+using Microsoft.AspNetCore.Http;
+using OfficeOpenXml;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ComplyExchangeCMS.Persistence.Services
 {
     public class RuleService : IRuleService
     {
         private readonly IConfiguration _configuration;
-        public RuleService(IConfiguration configuration)
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public RuleService(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             _configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
         }
-            public IDbConnection CreateConnection()
+        public IDbConnection CreateConnection()
         {
             return new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
@@ -194,6 +200,94 @@ namespace ComplyExchangeCMS.Persistence.Services
                 return result.ToList();
             }
         }
+        public void UploadFile(IFormFile files)
+        {
+            var target = Path.Combine(_hostingEnvironment.ContentRootPath, "UploadedFiles");
 
+            Directory.CreateDirectory(target);
+
+            if (files.Length <= 0) return;
+            var filePath = Path.Combine(target, files.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                files.CopyToAsync(stream);
+            }
+            InsertRules(filePath);
+        }
+        public void InsertRules(string filePath)
+        {
+            // Assuming you have the path to the Excel file
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0]; // Assuming data is in the first worksheet
+
+                // Assuming the data starts from the second row (excluding header)
+                int startRow = 2;
+                int endRow = worksheet.Dimension.End.Row;
+
+                // Assuming you have a class representing the data structure
+                List<RulesInsert> data = new List<RulesInsert>();
+
+                for (int row = startRow; row <= endRow; row++)
+                {
+                    RulesInsert rowData = new RulesInsert
+                    {
+                        // Map the columns from the Excel file to your class properties
+                        Code = worksheet.Cells[row, 1].Value?.ToString(),
+                        RuleClass = worksheet.Cells[row, 2].Value?.ToString(),
+                        Warning = worksheet.Cells[row, 3].Value?.ToString(),
+                        CreatedOn = DateTime.UtcNow
+                    };
+
+                    bool.TryParse(worksheet.Cells[row, 4].Value?.ToString(), out bool isNotAllowedSubmission);
+                    rowData.isNotAllowedSubmissionToContinue = isNotAllowedSubmission;
+
+                    bool.TryParse(worksheet.Cells[row, 5].Value?.ToString(), out bool disableRule);
+                    rowData.DisableRule = disableRule;
+
+                    data.Add(rowData);
+                }
+
+
+                using (var connection = CreateConnection())
+                {
+                    foreach (RulesInsert rowData in data)
+                    {
+                        string sql = "INSERT INTO [dbo].[Rules] ([Code] ,[class] ,[Warning] ,[isNotAllowedSubmissionToContinue] ,[DisableRule] ,[CreatedOn] ,[ModifiedOn] ,[IsActive]) VALUES (@Code ,@RuleClass ,@Warning ,@isNotAllowedSubmissionToContinue ,@DisableRule ,@CreatedOn ,NULL ,1)";
+                        connection.Execute(sql, rowData);
+                    }
+                }
+            }
+        }
+        public byte[] GenerateExcelFile()
+        {
+            // SQL query to retrieve data
+            string query = "SELECT [Code] ,[class] ,[Warning] ,[isNotAllowedSubmissionToContinue] ,[DisableRule] FROM [Rules]";
+
+            using (var connection = CreateConnection())
+            {
+                // Execute the query and retrieve data using Dapper
+                var data = connection.Query(query);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                // Create a new Excel package
+                ExcelPackage package = new ExcelPackage();
+
+                // Add a new worksheet
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+                // Write data to the worksheet
+                worksheet.Cells.LoadFromCollection(data, true);
+
+                // Save the Excel package to a memory stream
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    package.SaveAs(stream);
+                    return stream.ToArray();
+                }
+            }
+        }
     }
 }

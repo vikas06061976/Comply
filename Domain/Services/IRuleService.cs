@@ -1,5 +1,6 @@
 ﻿using ComplyExchangeCMS.Domain.Models.Master;
 using ComplyExchangeCMS.Domain.Models.Rules;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace ComplyExchangeCMS.Domain.Services
         Task<int> InsertRulesTranslation(RuleTranslationInsert ruleModel);
         Task<RuleTranslationView> GetRuleTranslation(int ruleId, int languageId);
         Task<IReadOnlyList<ModuleLanguageView>> GetAllLanguage(int ruleId);
+        void UploadFile(IFormFile files);
+        byte[] GenerateExcelFile();
     }
 }
 

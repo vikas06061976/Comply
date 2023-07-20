@@ -1,7 +1,11 @@
 ﻿using ComplyExchangeCMS.Domain;
 using ComplyExchangeCMS.Domain.Models.Rules;
 using Domain.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,10 +16,11 @@ namespace ComplyExchangeCMS.Presentation.Controllers
     public class RuleController : ControllerBase
     {
         private readonly IUnitOfWork unitOfWork;
-
-        public RuleController(IUnitOfWork unitOfWork)
+        private readonly IHostingEnvironment webHostEnvironment;
+        public RuleController(IUnitOfWork unitOfWork, IHostingEnvironment webHostEnvironment)
         {
             this.unitOfWork = unitOfWork;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet("GetAllRules")]
@@ -83,6 +88,32 @@ namespace ComplyExchangeCMS.Presentation.Controllers
         {
             var data = await unitOfWork.RuleService.GetAllLanguage(ruleId);
             return Ok(data);
+        }
+
+        [HttpPost("Import")]
+        public IActionResult CreateEasyHelp(IFormFile formFile)
+        {
+            unitOfWork.RuleService.UploadFile(formFile);
+            return Ok("File Uploaded successfully");
+            
+        }
+
+        [HttpGet("Export")]
+        public IActionResult DownloadExcel()
+        {
+            byte[] excelData = unitOfWork.RuleService.GenerateExcelFile();
+
+            // Set the file name and content type
+            string fileName = "Rules.xlsx";
+            string easyHelpType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            // Save the Excel file to the wwwroot folder
+            string webRootPath = webHostEnvironment.WebRootPath;
+            string filePath = Path.Combine(webRootPath, fileName);
+            System.IO.File.WriteAllBytes(filePath, excelData);
+
+            // Return the file as a response
+            return File(excelData, easyHelpType, fileName);
         }
     }
 }
